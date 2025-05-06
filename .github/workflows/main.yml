@@ -3,7 +3,7 @@ name: Build and Publish Docker image
 on:
   push:
     branches:
-      - oz/devcontainer # TODO: Change to main branch
+      - main
   workflow_dispatch:
 
 jobs:
