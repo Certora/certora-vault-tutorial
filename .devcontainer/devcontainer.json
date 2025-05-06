@@ -1,0 +1,16 @@
+{
+    "name": "Certora Vault Tutorial",
+    "image": "ghcr.io/certora/certora-vault-tutorial:latest",
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "rust-lang.rust-analyzer"
+        ],
+        "settings": {
+          "terminal.integrated.defaultProfile.linux": "bash"
+        }
+      }
+    },
+    "postCreateCommand": "echo 'Container is ready!'"
+  }
+  
