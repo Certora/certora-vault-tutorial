@@ -1,0 +1,1 @@
+;; Summaries specific to the current package

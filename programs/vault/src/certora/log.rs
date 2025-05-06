@@ -1,0 +1,1 @@
+/// Implementation for cvlr::log::CvlrLog trait

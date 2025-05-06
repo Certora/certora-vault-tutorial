@@ -24,4 +24,8 @@ bytemuck.workspace = true
 cvlr = { workspace = true, optional = true }
 cvlr-solana = { workspace = true, optional = true }
 
-
+# === Certora CVLR ===
+[package.metadata.certora]
+sources = [ "src/**/*.rs" ]
+solana_inlining = [ "src/certora/envs/cvlr_inlining.txt" ]
+solana_summaries = [ "src/certora/envs/cvlr_summaries.txt" ]

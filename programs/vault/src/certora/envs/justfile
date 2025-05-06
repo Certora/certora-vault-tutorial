@@ -1,0 +1,39 @@
+##------------------------------------------------------------------------##
+## This script is intended to be run only once during the project setup
+##------------------------------------------------------------------------##
+
+import "envs.just"
+
+export HEADER := '''
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; DO NOT EDIT. THIS FILE HAS BEEN AUTOMATICALLY GENERATED
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;
+'''
+
+refresh:
+  # download core and anchor files
+  curl -o  cvlr_inlining_anchor.txt https://raw.githubusercontent.com/Certora/solana-spec-template/refs/heads/main/envs/cvlr_inlining_anchor.txt
+  curl -o  cvlr_summaries_anchor.txt https://raw.githubusercontent.com/Certora/solana-spec-template/refs/heads/main/envs/cvlr_summaries_anchor.txt
+  curl -o  cvlr_inlining_core.txt https://raw.githubusercontent.com/Certora/solana-spec-template/refs/heads/main/envs/cvlr_inlining_core.txt
+  curl -o  cvlr_summaries_core.txt https://raw.githubusercontent.com/Certora/solana-spec-template/refs/heads/main/envs/cvlr_summaries_core.txt
+
+make-header:
+  printf %s "$HEADER" > {{ inliner_cfg }}
+  printf %s "$HEADER" > {{ summaries_cfg }}
+
+make-envs: make-header
+	cat {{ core_inliner_cfg }} {{ anchor_inliner_cfg }} {{ package_inliner_cfg }} >> {{ inliner_cfg }}
+	cat {{ core_summaries_cfg }} {{ anchor_summaries_cfg }} {{ package_summaries_cfg }} >> {{ summaries_cfg }}
+	
+clean:
+        rm -f {{ inliner_cfg }}
+        rm -f {{ summaries_cfg }}
+
+build: make-envs
+
+rebuild: refresh build
+
+
+

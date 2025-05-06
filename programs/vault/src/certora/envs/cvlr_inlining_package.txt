@@ -1,0 +1,1 @@
+;;;; Inlining specific to the current package
