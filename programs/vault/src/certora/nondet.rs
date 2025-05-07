@@ -2,7 +2,6 @@
 
 use crate::state::Vault;
 use cvlr_solana::cvlr_nondet_pubkey;
-use cvlr::nondet;
 use cvlr::nondet::nondet_with;
 use crate::certora::constants::MAX_FEE_BPS;
 
@@ -12,9 +11,10 @@ impl cvlr::nondet::Nondet for Vault {
             admin: cvlr_nondet_pubkey(),
             shares_mint: cvlr_nondet_pubkey(),
             assets_mint: cvlr_nondet_pubkey(),
-            shares: nondet(),
-            assets: nondet(),
-            fee_bps: nondet_with( |x| *x <= MAX_FEE_BPS.into()), 
+            shares: u64::nondet().into(),
+            assets: u64::nondet().into(),
+            vault_assets_account: cvlr_nondet_pubkey(),
+            fee_bps: nondet_with( |x:&u64| *x <= MAX_FEE_BPS).into(), 
             fee_token_account: cvlr_nondet_pubkey()
         }
     }

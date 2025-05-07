@@ -15,7 +15,7 @@ pub struct NoDilutionProp {
 } 
 
 pub struct FeeAssessedProp {
-    fee_bps: u64
+    fee_bps: NativeInt
 } 
 
 mod log {
@@ -66,8 +66,8 @@ mod log {
 impl CvlrProp for SolvencyInvariant {
     fn new(vault: &Vault) -> Self { 
         Self {
-            shares_total: vault.shares.into(),
-            token_total: vault.assets.into()
+            shares_total: vault.num_shares().into(),
+            token_total: vault.num_assets().into()
         } 
     }
 
@@ -84,8 +84,8 @@ impl CvlrProp for SolvencyInvariant {
 impl CvlrProp for NoDilutionProp {
     fn new(vault: &Vault) -> Self { 
         Self {
-            shares_total: vault.shares.into(),
-            token_total: vault.assets.into()
+            shares_total: vault.num_shares().into(),
+            token_total: vault.num_assets().into()
         } 
     }
 
@@ -100,7 +100,7 @@ impl CvlrProp for NoDilutionProp {
 impl CvlrProp for FeeAssessedProp {
     fn new(vault: &Vault) -> Self { 
         Self {
-            fee_bps: vault.fee_bps
+            fee_bps: u64::from(vault.fee_bps).into()
         } 
     }
 
@@ -111,7 +111,7 @@ impl CvlrProp for FeeAssessedProp {
             let fee_bps = self.fee_bps;
             cvlr::clog!(tokens_amount, fee_bps, effect);
             cvlr_assert_le!(effect.assets_to_fee, tokens_amount);
-            if fee_bps > 0 {
+            if fee_bps > 0u64.into() {
                 cvlr_assert_gt!(effect.assets_to_fee, 0);
             }
         
