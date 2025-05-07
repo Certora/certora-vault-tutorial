@@ -1,8 +1,8 @@
 use solana_program::{account_info::AccountInfo, program_error::ProgramError};
 
 use crate::{
-    loaders::{DepositContext, RedeemSharesContext},
-    operations::{vault_deposit_assets, vault_redeem_shares},
+    loaders::{DepositContext, RedeemSharesContext, UpdateRewardContext},
+    operations::{vault_deposit_assets, vault_redeem_shares, vault_update_reward},
 };
 
 pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> Result<(), ProgramError> {
@@ -78,6 +78,27 @@ pub fn process_redeem_shares(accounts: &[AccountInfo], amount: u64) -> Result<()
     Ok(())
 }
 
+pub fn process_update_reward(accounts: &[AccountInfo]) -> Result<(), ProgramError> {
+    let context = UpdateRewardContext::load(accounts)?;
+
+    // This instruction is permissionless. Anyone can run it to update vault state.
+    // IRL it should be limited to once per epoch 
+
+    let UpdateRewardContext {
+        vault_info,
+        vault_assets_account,
+    } = context;
+
+    let vault_asset_account_amount = spl_token_account_amount(&vault_assets_account)?;
+
+    let _effect = {
+        let mut vault = vault_info.get_mut()?;
+        vault_update_reward(&mut *vault, vault_asset_account_amount)?;
+    };
+
+    Ok(())
+}
+
 pub fn spl_transfer_assets_to_vault(
     _amount: u64,
     _vault_assets: &AccountInfo,
@@ -119,4 +140,9 @@ pub fn spl_transfer_assets_to_user(
 ) -> Result<(), ProgramError> {
     // Use PDA as vault assets owner
     Ok(())
+}
+
+pub fn spl_token_account_amount(_info: &AccountInfo) -> Result<u64, ProgramError> {
+    // read amount value from the account
+    Ok(0)
 }

@@ -132,3 +132,18 @@ impl<'info> RedeemSharesContext<'info> {
         })
     }
 }
+
+pub struct UpdateRewardContext<'info> {
+    pub vault_info: VaultInfo<'info>,
+    pub vault_assets_account: AccountInfo<'info>,
+}
+
+impl<'info> UpdateRewardContext<'info> {
+    pub fn load(accounts: &[AccountInfo<'info>]) -> Result<Self, ProgramError> {
+        let iter = &mut accounts.iter();
+        Ok(Self {
+            vault_info: next_account_info(iter)?.try_into()?,
+            vault_assets_account: next_account_info(iter)?.clone(),
+        })
+    }
+}
