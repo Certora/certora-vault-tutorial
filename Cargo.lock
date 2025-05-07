@@ -485,7 +485,9 @@ dependencies = [
  "bytemuck",
  "cvlr",
  "cvlr-solana",
+ "num_enum",
  "solana-program",
+ "spl-pod",
 ]
 
 [[package]]
