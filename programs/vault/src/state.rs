@@ -76,7 +76,7 @@ impl Vault {
     }
 
     pub fn mint_shares(&mut self, amt: u64) -> VaultResult<()> {
-        require_gt!(amt, 0);
+        require_gt!(amt, 0, VaultError::GuardFail);
         self.shares = self
             .num_shares()
             .checked_add(amt)
@@ -86,7 +86,7 @@ impl Vault {
     }
 
     pub fn add_token(&mut self, amt: u64) -> VaultResult<()> {
-        require_gt!(amt, 0);
+        require_gt!(amt, 0, VaultError::GuardFail);
         self.assets = self
             .num_assets()
             .checked_add(amt)

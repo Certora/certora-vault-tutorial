@@ -73,7 +73,7 @@ pub struct FeeBps(u64);
 impl TryFrom<u64> for FeeBps {
     type Error = VaultError;
     fn try_from(value: u64) -> Result<Self, Self::Error> {
-        require_le!(value, ONE_IN_BPS);
+        require_le!(value, ONE_IN_BPS, VaultError::GuardFail);
         Ok(FeeBps(value))
     }
 }
