@@ -4,7 +4,7 @@ use std::{
     result::Result,
 };
 
-use solana_program::{account_info::AccountInfo, program_error::ProgramError};
+use solana_program::{account_info::{next_account_info, AccountInfo}, program_error::ProgramError};
 
 use crate::state::Vault;
 
@@ -49,5 +49,26 @@ impl<'info> VaultInfo<'info> {
             bytemuck::from_bytes_mut::<Vault>(&mut data[0..size_of::<Vault>()])
         });
         Ok(res)
+    }
+}
+
+pub struct DepositContext<'info> {
+    pub vault_info: VaultInfo<'info>,
+    pub vault_assets_account: AccountInfo<'info>,
+    pub user_token_account: AccountInfo<'info>,
+    pub authority: AccountInfo<'info>,
+    pub spl_token_program: AccountInfo<'info>,
+}
+
+impl<'info> DepositContext<'info> {
+    pub fn load(accounts: &[AccountInfo<'info>]) -> Result<Self, ProgramError> {
+        let iter = &mut accounts.iter();
+        Ok(Self {
+            vault_info: next_account_info(iter)?.clone().try_into()?,
+            vault_assets_account: next_account_info(iter)?.clone(),
+            user_token_account: next_account_info(iter)?.clone(),
+            authority: next_account_info(iter)?.clone(),
+            spl_token_program: next_account_info(iter)?.clone(),
+        })
     }
 }
