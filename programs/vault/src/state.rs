@@ -2,7 +2,10 @@ use bytemuck::{Pod, Zeroable};
 use solana_program::pubkey::Pubkey;
 
 use crate::utils::math::FeeBps;
-use crate::utils::{guards::require_gt, math::mul_div_floor};
+use crate::utils::{
+    guards::{require_gt, require_ne},
+    math::mul_div_floor,
+};
 use crate::{VaultError, VaultResult};
 use spl_pod::primitives::PodU64;
 
@@ -104,6 +107,11 @@ impl Vault {
 
         // ensure that vault is still solvent after slashing
         self.check_invariant()?;
+        Ok(())
+    }
+
+    pub fn validate(&self) -> VaultResult<()> {
+        require_ne!(self.assets_mint, self.shares_mint, VaultError::GuardFail);
         Ok(())
     }
 }

@@ -1,15 +1,18 @@
-use std::{
-    cell::{Ref, RefMut},
-    mem::size_of,
-    result::Result,
+use {
+    crate::{
+        state::Vault,
+        utils::guards::{require, require_eq},
+    },
+    solana_program::{
+        account_info::{next_account_info, AccountInfo},
+        program_error::ProgramError,
+    },
+    std::{
+        cell::{Ref, RefMut},
+        mem::size_of,
+        result::Result,
+    },
 };
-
-use solana_program::{
-    account_info::{next_account_info, AccountInfo},
-    program_error::ProgramError,
-};
-
-use crate::{state::Vault, utils::guards::require};
 
 pub struct Signer<'info> {
     pub info: AccountInfo<'info>,
@@ -25,9 +28,30 @@ impl<'info> TryFrom<&AccountInfo<'info>> for Signer<'info> {
 
 impl<'info> AsRef<AccountInfo<'info>> for Signer<'info> {
     fn as_ref(&self) -> &AccountInfo<'info> {
-       &self.info
+        &self.info
     }
 }
+
+
+pub struct SplTokenProgramInfo<'info> {
+    pub info: AccountInfo<'info>
+}
+
+impl<'info> TryFrom<&AccountInfo<'info>> for SplTokenProgramInfo<'info> {
+    type Error = ProgramError;
+    fn try_from(info: &AccountInfo<'info>) -> Result<Self, Self::Error> {
+        spl_token::check_program_account(info.key)?;
+        Ok(Self { info: info.clone() })
+    }
+}
+
+impl<'info> AsRef<AccountInfo<'info>> for SplTokenProgramInfo<'info> {
+    fn as_ref(&self) -> &AccountInfo<'info> {
+        &self.info
+    }
+}
+
+
 
 pub struct VaultInfo<'info> {
     info: AccountInfo<'info>,
@@ -45,14 +69,13 @@ impl<'info> TryFrom<&AccountInfo<'info>> for VaultInfo<'info> {
     fn try_from(info: &AccountInfo<'info>) -> Result<Self, Self::Error> {
         // owned by vault program
         // has discriminant
-        Self { info: info.clone() }.check_is_valid()
+        Self { info: info.clone() }.validate()
     }
 }
 
 impl<'info> VaultInfo<'info> {
-    pub fn check_is_valid(self) -> Result<Self, ProgramError> {
-        // require_neq!(self.assets_mint, self.shares_mint);
-
+    pub fn validate(self) -> Result<Self, ProgramError> {
+        self.get()?.validate()?;
         Ok(self)
     }
 
@@ -87,13 +110,33 @@ pub struct DepositContext<'info> {
     pub authority: Signer<'info>,
     pub user_shares_account: AccountInfo<'info>,
     // SPL token program to make the transfer
-    pub spl_token_program: AccountInfo<'info>,
+    pub spl_token_program: SplTokenProgramInfo<'info>,
+}
+
+impl<'info> DepositContext<'info> {
+    pub fn validate(self) -> Result<Self, ProgramError> {
+        let vault = self.vault_info.get()?;
+        require_eq!(
+            &vault.assets_mint,
+            self.assets_mint.key,
+            ProgramError::InvalidArgument
+        );
+        
+        require_eq!(
+            &vault.shares_mint,
+            self.shares_mint.key,
+            ProgramError::InvalidArgument
+        );
+
+        drop(vault);
+        Ok(self)
+    }
 }
 
 impl<'info> DepositContext<'info> {
     pub fn load(accounts: &[AccountInfo<'info>]) -> Result<Self, ProgramError> {
         let iter = &mut accounts.iter();
-        Ok(Self {
+        Self {
             vault_info: next_account_info(iter)?.try_into()?,
             vault_assets_account: next_account_info(iter)?.clone(),
             assets_mint: next_account_info(iter)?.clone(),
@@ -101,8 +144,9 @@ impl<'info> DepositContext<'info> {
             user_assets_account: next_account_info(iter)?.clone(),
             authority: next_account_info(iter)?.try_into()?,
             user_shares_account: next_account_info(iter)?.clone(),
-            spl_token_program: next_account_info(iter)?.clone(),
-        })
+            spl_token_program: next_account_info(iter)?.try_into()?,
+        }
+        .validate()
     }
 }
 
@@ -114,7 +158,7 @@ pub struct RedeemSharesContext<'info> {
     pub user_shares_account: AccountInfo<'info>,
     pub authority: Signer<'info>,
     pub user_assets_account: AccountInfo<'info>,
-    pub spl_token_program: AccountInfo<'info>,
+    pub spl_token_program: SplTokenProgramInfo<'info>,
 }
 
 impl<'info> RedeemSharesContext<'info> {
@@ -128,7 +172,7 @@ impl<'info> RedeemSharesContext<'info> {
             user_shares_account: next_account_info(iter)?.clone(),
             authority: next_account_info(iter)?.try_into()?,
             user_assets_account: next_account_info(iter)?.clone(),
-            spl_token_program: next_account_info(iter)?.clone(),
+            spl_token_program: next_account_info(iter)?.try_into()?,
         })
     }
 }

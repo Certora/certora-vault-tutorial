@@ -1,11 +1,13 @@
-use solana_program::{account_info::AccountInfo, program_error::ProgramError};
+use solana_program::{
+    account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
+};
 
 use crate::{
     loaders::{DepositContext, RedeemSharesContext, UpdateRewardContext},
     operations::{vault_deposit_assets, vault_redeem_shares, vault_update_reward},
 };
 
-pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> Result<(), ProgramError> {
+pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> ProgramResult {
     let DepositContext {
         vault_info,
         vault_assets_account,
@@ -28,20 +30,20 @@ pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> Result<(), Prog
         &user_assets_account,
         &assets_mint,
         authority.as_ref(),
-        &spl_token_program,
+        spl_token_program.as_ref(),
     )?;
 
     spl_mint_shares(
         effect.shares_to_user,
         &user_shares_account,
         &shares_mint,
-        &spl_token_program,
+        spl_token_program.as_ref(),
     )?;
 
     Ok(())
 }
 
-pub fn process_redeem_shares(accounts: &[AccountInfo], amount: u64) -> Result<(), ProgramError> {
+pub fn process_redeem_shares(accounts: &[AccountInfo], amount: u64) -> ProgramResult {
     let context = RedeemSharesContext::load(accounts)?;
     let RedeemSharesContext {
         vault_info,
@@ -64,7 +66,7 @@ pub fn process_redeem_shares(accounts: &[AccountInfo], amount: u64) -> Result<()
         &shares_mint,
         &user_shares_account,
         authority.as_ref(),
-        &spl_token_program,
+        spl_token_program.as_ref(),
     )?;
 
     spl_transfer_assets_to_user(
@@ -72,17 +74,17 @@ pub fn process_redeem_shares(accounts: &[AccountInfo], amount: u64) -> Result<()
         &vault_assets_account,
         &user_assets_account,
         &assets_mint,
-        &spl_token_program,
+        spl_token_program.as_ref(),
     )?;
 
     Ok(())
 }
 
-pub fn process_update_reward(accounts: &[AccountInfo]) -> Result<(), ProgramError> {
+pub fn process_update_reward(accounts: &[AccountInfo]) -> ProgramResult {
     let context = UpdateRewardContext::load(accounts)?;
 
     // This instruction is permissionless. Anyone can run it to update vault state.
-    // IRL it should be limited to once per epoch 
+    // IRL it should be limited to once per epoch
 
     let UpdateRewardContext {
         vault_info,
@@ -106,7 +108,7 @@ pub fn spl_transfer_assets_to_vault(
     _mint: &AccountInfo,
     _authority: &AccountInfo,
     _spl_token_program: &AccountInfo,
-) -> Result<(), ProgramError> {
+) -> ProgramResult {
     Ok(())
 }
 
@@ -115,7 +117,7 @@ pub fn spl_mint_shares(
     _user_shares_account: &AccountInfo,
     _mint: &AccountInfo,
     _spl_token_program: &AccountInfo,
-) -> Result<(), ProgramError> {
+) -> ProgramResult {
     // CPI call. Use PDA as a mint authority
     Ok(())
 }
@@ -126,7 +128,7 @@ pub fn spl_burn_shares(
     _mint: &AccountInfo,
     _authority: &AccountInfo,
     _spl_token_program: &AccountInfo,
-) -> Result<(), ProgramError> {
+) -> ProgramResult {
     // CPI call. Use PDA as a mint authority
     Ok(())
 }
@@ -137,7 +139,7 @@ pub fn spl_transfer_assets_to_user(
     _user_assets: &AccountInfo,
     _mint: &AccountInfo,
     _spl_token_program: &AccountInfo,
-) -> Result<(), ProgramError> {
+) -> ProgramResult {
     // Use PDA as vault assets owner
     Ok(())
 }
