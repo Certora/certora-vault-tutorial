@@ -9,7 +9,25 @@ use solana_program::{
     program_error::ProgramError,
 };
 
-use crate::state::Vault;
+use crate::{state::Vault, utils::guards::require};
+
+pub struct Signer<'info> {
+    pub info: AccountInfo<'info>,
+}
+
+impl<'info> TryFrom<&AccountInfo<'info>> for Signer<'info> {
+    type Error = ProgramError;
+    fn try_from(info: &AccountInfo<'info>) -> Result<Self, Self::Error> {
+        require!(info.is_signer, ProgramError::MissingRequiredSignature);
+        Ok(Self { info: info.clone() })
+    }
+}
+
+impl<'info> AsRef<AccountInfo<'info>> for Signer<'info> {
+    fn as_ref(&self) -> &AccountInfo<'info> {
+       &self.info
+    }
+}
 
 pub struct VaultInfo<'info> {
     info: AccountInfo<'info>,
@@ -21,13 +39,13 @@ impl<'info> AsRef<AccountInfo<'info>> for VaultInfo<'info> {
     }
 }
 
-impl<'info> TryFrom<AccountInfo<'info>> for VaultInfo<'info> {
+impl<'info> TryFrom<&AccountInfo<'info>> for VaultInfo<'info> {
     type Error = ProgramError;
 
-    fn try_from(info: AccountInfo<'info>) -> Result<Self, Self::Error> {
+    fn try_from(info: &AccountInfo<'info>) -> Result<Self, Self::Error> {
         // owned by vault program
         // has discriminant
-        Self { info }.check_is_valid()
+        Self { info: info.clone() }.check_is_valid()
     }
 }
 
@@ -66,7 +84,7 @@ pub struct DepositContext<'info> {
     // token account for the user making a deposit
     pub user_assets_account: AccountInfo<'info>,
     // signing authority for the user assets account
-    pub authority: AccountInfo<'info>,
+    pub authority: Signer<'info>,
     pub user_shares_account: AccountInfo<'info>,
     // SPL token program to make the transfer
     pub spl_token_program: AccountInfo<'info>,
@@ -76,12 +94,12 @@ impl<'info> DepositContext<'info> {
     pub fn load(accounts: &[AccountInfo<'info>]) -> Result<Self, ProgramError> {
         let iter = &mut accounts.iter();
         Ok(Self {
-            vault_info: next_account_info(iter)?.clone().try_into()?,
+            vault_info: next_account_info(iter)?.try_into()?,
             vault_assets_account: next_account_info(iter)?.clone(),
             assets_mint: next_account_info(iter)?.clone(),
             shares_mint: next_account_info(iter)?.clone(),
             user_assets_account: next_account_info(iter)?.clone(),
-            authority: next_account_info(iter)?.clone(),
+            authority: next_account_info(iter)?.try_into()?,
             user_shares_account: next_account_info(iter)?.clone(),
             spl_token_program: next_account_info(iter)?.clone(),
         })
@@ -94,7 +112,7 @@ pub struct RedeemSharesContext<'info> {
     pub assets_mint: AccountInfo<'info>,
     pub shares_mint: AccountInfo<'info>,
     pub user_shares_account: AccountInfo<'info>,
-    pub authority: AccountInfo<'info>,
+    pub authority: Signer<'info>,
     pub user_assets_account: AccountInfo<'info>,
     pub spl_token_program: AccountInfo<'info>,
 }
@@ -103,12 +121,12 @@ impl<'info> RedeemSharesContext<'info> {
     pub fn load(accounts: &[AccountInfo<'info>]) -> Result<Self, ProgramError> {
         let iter = &mut accounts.iter();
         Ok(Self {
-            vault_info: next_account_info(iter)?.clone().try_into()?,
+            vault_info: next_account_info(iter)?.try_into()?,
             vault_assets_account: next_account_info(iter)?.clone(),
             assets_mint: next_account_info(iter)?.clone(),
             shares_mint: next_account_info(iter)?.clone(),
             user_shares_account: next_account_info(iter)?.clone(),
-            authority: next_account_info(iter)?.clone(),
+            authority: next_account_info(iter)?.try_into()?,
             user_assets_account: next_account_info(iter)?.clone(),
             spl_token_program: next_account_info(iter)?.clone(),
         })

@@ -27,7 +27,7 @@ pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> Result<(), Prog
         &vault_assets_account,
         &user_assets_account,
         &assets_mint,
-        &authority,
+        authority.as_ref(),
         &spl_token_program,
     )?;
 
@@ -63,7 +63,7 @@ pub fn process_redeem_shares(accounts: &[AccountInfo], amount: u64) -> Result<()
         effect.shares_to_burn,
         &shares_mint,
         &user_shares_account,
-        &authority,
+        authority.as_ref(),
         &spl_token_program,
     )?;
 

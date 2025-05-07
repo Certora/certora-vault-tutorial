@@ -30,6 +30,16 @@ mod inner {
         };
     }
     pub(crate) use impl_bin_require;
+
+
+    macro_rules! require {
+        ($cond: expr, $err: expr $(, $desc:literal)? ) => {{
+            if $cond  { } else { panic!(); } 
+
+        }};
+    }
+
+    pub(crate) use require;
 }
 
 pub(crate) use inner::*;
