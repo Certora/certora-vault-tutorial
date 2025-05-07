@@ -4,6 +4,7 @@ pub mod state;
 pub mod utils;
 pub mod instruction;
 pub mod loaders;
+pub mod processor;
 
 pub mod certora;
 

@@ -4,7 +4,10 @@ use std::{
     result::Result,
 };
 
-use solana_program::{account_info::{next_account_info, AccountInfo}, program_error::ProgramError};
+use solana_program::{
+    account_info::{next_account_info, AccountInfo},
+    program_error::ProgramError,
+};
 
 use crate::state::Vault;
 
@@ -53,10 +56,19 @@ impl<'info> VaultInfo<'info> {
 }
 
 pub struct DepositContext<'info> {
+    // the vault
     pub vault_info: VaultInfo<'info>,
+    // token account of the vault deposit
     pub vault_assets_account: AccountInfo<'info>,
-    pub user_token_account: AccountInfo<'info>,
+    // mint for assets token
+    pub assets_mint: AccountInfo<'info>,
+    pub shares_mint: AccountInfo<'info>,
+    // token account for the user making a deposit
+    pub user_assets_account: AccountInfo<'info>,
+    // signing authority for the user assets account
     pub authority: AccountInfo<'info>,
+    pub user_shares_account: AccountInfo<'info>,
+    // SPL token program to make the transfer
     pub spl_token_program: AccountInfo<'info>,
 }
 
@@ -66,8 +78,38 @@ impl<'info> DepositContext<'info> {
         Ok(Self {
             vault_info: next_account_info(iter)?.clone().try_into()?,
             vault_assets_account: next_account_info(iter)?.clone(),
-            user_token_account: next_account_info(iter)?.clone(),
+            assets_mint: next_account_info(iter)?.clone(),
+            shares_mint: next_account_info(iter)?.clone(),
+            user_assets_account: next_account_info(iter)?.clone(),
             authority: next_account_info(iter)?.clone(),
+            user_shares_account: next_account_info(iter)?.clone(),
+            spl_token_program: next_account_info(iter)?.clone(),
+        })
+    }
+}
+
+pub struct RedeemSharesContext<'info> {
+    pub vault_info: VaultInfo<'info>,
+    pub vault_assets_account: AccountInfo<'info>,
+    pub assets_mint: AccountInfo<'info>,
+    pub shares_mint: AccountInfo<'info>,
+    pub user_shares_account: AccountInfo<'info>,
+    pub authority: AccountInfo<'info>,
+    pub user_assets_account: AccountInfo<'info>,
+    pub spl_token_program: AccountInfo<'info>,
+}
+
+impl<'info> RedeemSharesContext<'info> {
+    pub fn load(accounts: &[AccountInfo<'info>]) -> Result<Self, ProgramError> {
+        let iter = &mut accounts.iter();
+        Ok(Self {
+            vault_info: next_account_info(iter)?.clone().try_into()?,
+            vault_assets_account: next_account_info(iter)?.clone(),
+            assets_mint: next_account_info(iter)?.clone(),
+            shares_mint: next_account_info(iter)?.clone(),
+            user_shares_account: next_account_info(iter)?.clone(),
+            authority: next_account_info(iter)?.clone(),
+            user_assets_account: next_account_info(iter)?.clone(),
             spl_token_program: next_account_info(iter)?.clone(),
         })
     }
