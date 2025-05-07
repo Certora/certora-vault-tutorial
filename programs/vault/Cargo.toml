@@ -20,6 +20,8 @@ certora = ["no-entrypoint", "dep:cvlr", "dep:cvlr-solana"]
 [dependencies]
 solana-program.workspace = true
 bytemuck.workspace = true
+num_enum.workspace = true
+spl-pod.workspace = true
 
 cvlr = { workspace = true, optional = true }
 cvlr-solana = { workspace = true, optional = true }

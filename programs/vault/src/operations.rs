@@ -25,7 +25,7 @@ pub fn vault_deposit_assets(vault: &mut Vault, tkn_amt: u64) -> VaultResult<Vaul
 }
 
 pub fn vault_deposit_assets_with_fee(vault: &mut Vault, tkn_amt: u64) -> VaultResult<VaultEffect> {
-    let fee_bps: FeeBps = vault.fee_bps.try_into()?;
+    let fee_bps: FeeBps = vault.fee_in_bps()?;
     let gross = fee_bps.apply(tkn_amt)?;
 
     let shares_to_user = vault.convert_assets_to_shares(gross.net_amount)?;
@@ -81,9 +81,10 @@ mod tests {
             admin: Pubkey::default(),
             shares_mint: Pubkey::default(),
             assets_mint: Pubkey::default(),
-            shares: 100,
-            assets: 100,
-            fee_bps: 500, // 5%
+            shares: 100u64.into(),
+            assets: 100u64.into(),
+            vault_assets_account: Pubkey::default(),
+            fee_bps: 500u64.into(), // 5%
             fee_token_account: Pubkey::default(),
         }
     }
@@ -94,8 +95,8 @@ mod tests {
         let effect = vault_deposit_assets(&mut vault, 50).unwrap();
         assert_eq!(effect.shares_to_user, 50);
         assert_eq!(effect.assets_to_vault, 50);
-        assert_eq!(vault.assets, 150);
-        assert_eq!(vault.shares, 150);
+        assert_eq!(vault.num_assets(), 150);
+        assert_eq!(vault.num_shares(), 150);
     }
 
     #[test]
@@ -104,8 +105,8 @@ mod tests {
         let effect = vault_redeem_shares(&mut vault, 40).unwrap();
         assert_eq!(effect.assets_to_user, 40);
         assert_eq!(effect.shares_to_burn, 40);
-        assert_eq!(vault.assets, 60);
-        assert_eq!(vault.shares, 60);
+        assert_eq!(vault.num_assets(), 60);
+        assert_eq!(vault.num_shares(), 60);
     }
 
     #[test]
@@ -119,7 +120,7 @@ mod tests {
     fn test_vault_update_reward() {
         let mut vault = new_test_vault();
         let result = vault_update_reward(&mut vault, 150).unwrap();
-        assert_eq!(vault.assets, 150);
+        assert_eq!(vault.num_assets(), 150);
         assert_eq!(result, VaultEffect::default());
     }
 }
