@@ -5,6 +5,7 @@ pub enum VaultError {
     Unspecified,
     MathOverflow,
     GuardFail,
+    SelfTransfer,
 }
 
 // Define a custom Result type
