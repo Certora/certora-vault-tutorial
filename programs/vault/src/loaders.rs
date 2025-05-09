@@ -128,6 +128,12 @@ impl<'info> DepositContext<'info> {
             ProgramError::InvalidArgument
         );
 
+        require_eq!(
+            &vault.vault_assets_account,
+            self.vault_assets_account.key,
+            ProgramError::InvalidArgument
+        );
+
         drop(vault);
         Ok(self)
     }
@@ -162,9 +168,35 @@ pub struct RedeemSharesContext<'info> {
 }
 
 impl<'info> RedeemSharesContext<'info> {
+    pub fn validate(self) -> Result<Self, ProgramError> {
+        let vault = self.vault_info.get()?;
+        require_eq!(
+            &vault.assets_mint,
+            self.assets_mint.key,
+            ProgramError::InvalidArgument
+        );
+        
+        require_eq!(
+            &vault.shares_mint,
+            self.shares_mint.key,
+            ProgramError::InvalidArgument
+        );
+
+        require_eq!(
+            &vault.vault_assets_account,
+            self.vault_assets_account.key,
+            ProgramError::InvalidArgument
+        );
+
+        drop(vault);
+        Ok(self)
+    }
+}
+
+impl<'info> RedeemSharesContext<'info> {
     pub fn load(accounts: &[AccountInfo<'info>]) -> Result<Self, ProgramError> {
         let iter = &mut accounts.iter();
-        Ok(Self {
+        Self {
             vault_info: next_account_info(iter)?.try_into()?,
             vault_assets_account: next_account_info(iter)?.clone(),
             assets_mint: next_account_info(iter)?.clone(),
@@ -173,7 +205,7 @@ impl<'info> RedeemSharesContext<'info> {
             authority: next_account_info(iter)?.try_into()?,
             user_assets_account: next_account_info(iter)?.clone(),
             spl_token_program: next_account_info(iter)?.try_into()?,
-        })
+        }.validate()
     }
 }
 
@@ -183,11 +215,25 @@ pub struct UpdateRewardContext<'info> {
 }
 
 impl<'info> UpdateRewardContext<'info> {
+    pub fn validate(self) -> Result<Self, ProgramError> {
+        let vault = self.vault_info.get()?;
+        require_eq!(
+            &vault.vault_assets_account,
+            self.vault_assets_account.key,
+            ProgramError::InvalidArgument
+        );
+
+        drop(vault);
+        Ok(self)
+    }
+}
+
+impl<'info> UpdateRewardContext<'info> {
     pub fn load(accounts: &[AccountInfo<'info>]) -> Result<Self, ProgramError> {
         let iter = &mut accounts.iter();
-        Ok(Self {
+        Self {
             vault_info: next_account_info(iter)?.try_into()?,
             vault_assets_account: next_account_info(iter)?.clone(),
-        })
+        }.validate()
     }
 }
