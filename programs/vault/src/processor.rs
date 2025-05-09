@@ -5,6 +5,7 @@ use solana_program::{
 use crate::{
     loaders::{DepositContext, RedeemSharesContext, UpdateRewardContext},
     operations::{vault_deposit_assets, vault_redeem_shares, vault_update_reward},
+    utils::guards::require_ne,
 };
 
 pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> ProgramResult {
@@ -18,6 +19,8 @@ pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> ProgramResult {
         user_shares_account,
         spl_token_program,
     } = DepositContext::load(accounts)?;
+
+    require_ne!(vault_assets_account.key, user_assets_account.key, VaultError::SelfTransfer);
 
     let effect = {
         let mut vault = vault_info.get_mut()?;
@@ -37,6 +40,7 @@ pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> ProgramResult {
         effect.shares_to_user,
         &user_shares_account,
         &shares_mint,
+        authority.as_ref(),
         spl_token_program.as_ref(),
     )?;
 
@@ -56,6 +60,8 @@ pub fn process_redeem_shares(accounts: &[AccountInfo], amount: u64) -> ProgramRe
         spl_token_program,
     } = context;
 
+    require_ne!(vault_assets_account.key, user_assets_account.key, VaultError::SelfTransfer);
+
     let effect = {
         let mut vault = vault_info.get_mut()?;
         vault_redeem_shares(&mut *vault, amount)?
@@ -74,6 +80,7 @@ pub fn process_redeem_shares(accounts: &[AccountInfo], amount: u64) -> ProgramRe
         &vault_assets_account,
         &user_assets_account,
         &assets_mint,
+        authority.as_ref(),
         spl_token_program.as_ref(),
     )?;
 
@@ -101,6 +108,7 @@ pub fn process_update_reward(accounts: &[AccountInfo]) -> ProgramResult {
     Ok(())
 }
 
+#[cfg_attr(feature = "certora", cvlr::mock_fn(with=crate::certora::mocks::processor::spl_transfer_assets_to_vault))]
 pub fn spl_transfer_assets_to_vault(
     _amount: u64,
     _vault_assets: &AccountInfo,
@@ -109,19 +117,23 @@ pub fn spl_transfer_assets_to_vault(
     _authority: &AccountInfo,
     _spl_token_program: &AccountInfo,
 ) -> ProgramResult {
+    // CPI call
     Ok(())
 }
 
+#[cfg_attr(feature = "certora", cvlr::mock_fn(with=crate::certora::mocks::processor::spl_mint_shares))]
 pub fn spl_mint_shares(
     _amount: u64,
     _user_shares_account: &AccountInfo,
     _mint: &AccountInfo,
+    _authority: &AccountInfo,
     _spl_token_program: &AccountInfo,
 ) -> ProgramResult {
     // CPI call. Use PDA as a mint authority
     Ok(())
 }
 
+#[cfg_attr(feature = "certora", cvlr::mock_fn(with=crate::certora::mocks::processor::spl_burn_shares))]
 pub fn spl_burn_shares(
     _amount: u64,
     _user_shares_account: &AccountInfo,
@@ -133,18 +145,21 @@ pub fn spl_burn_shares(
     Ok(())
 }
 
+#[cfg_attr(feature = "certora", cvlr::mock_fn(with=crate::certora::mocks::processor::spl_transfer_assets_to_user))]
 pub fn spl_transfer_assets_to_user(
     _amount: u64,
     _vault_assets: &AccountInfo,
     _user_assets: &AccountInfo,
     _mint: &AccountInfo,
+    _authority: &AccountInfo,
     _spl_token_program: &AccountInfo,
 ) -> ProgramResult {
     // Use PDA as vault assets owner
     Ok(())
 }
 
+#[cfg_attr(feature = "certora", cvlr::mock_fn(with=crate::certora::mocks::processor::spl_token_account_amount))]
 pub fn spl_token_account_amount(_info: &AccountInfo) -> Result<u64, ProgramError> {
-    // read amount value from the account
+    // CPI call. Read amount value from the account
     Ok(0)
 }
