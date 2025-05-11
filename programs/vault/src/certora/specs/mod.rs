@@ -11,3 +11,4 @@ pub mod props_processor;
 pub mod solvency;
 pub mod solvency_processor;
 pub mod vault_consistency;
+pub mod inflation_attack;
