@@ -1,7 +1,6 @@
-/// Implementation for cvlr::log::CvlrLog trait
-
-use cvlr::log::cvlr_log_with;
 use crate::state::Vault;
+/// Implementation for cvlr::log::CvlrLog trait
+use cvlr::log::cvlr_log_with;
 
 impl cvlr::log::CvlrLog for Vault {
     fn log(&self, tag: &str, logger: &mut cvlr::log::CvlrLogger) {
