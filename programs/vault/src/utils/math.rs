@@ -3,8 +3,7 @@ use crate::{
     utils::guards::require_le,
 };
 
-#[cfg(not(feature = "certora"))]
-mod inner {
+pub mod math_native {
     use super::*;
 
     pub fn mul_div_floor(a: u64, b: u64, c: u64) -> VaultResult<u64> {
@@ -28,7 +27,7 @@ mod inner {
 }
 
 #[cfg(feature = "certora")]
-mod inner {
+pub mod math_certora {
     use super::*;
     use cvlr::mathint::NativeInt;
 
@@ -60,7 +59,10 @@ mod inner {
     }
 }
 
-pub use inner::*;
+#[cfg(feature = "certora")]
+pub use math_certora::*;
+#[cfg(not(feature = "certora"))]
+pub use math_native::*;
 
 pub struct GrossAmount {
     pub net_amount: u64,
