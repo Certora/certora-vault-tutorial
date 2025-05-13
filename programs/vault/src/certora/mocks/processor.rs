@@ -1,5 +1,5 @@
-use cvlr_solana::pubkey::Pk;
 use cvlr::prelude::*;
+use cvlr_solana::pubkey::Pk;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
 };

@@ -6,7 +6,6 @@ use crate::{
     loaders::DepositContext,
     operations::vault_deposit_assets,
     processor::{spl_mint_shares, spl_transfer_assets_from_user},
-    utils::guards::require_ne,
 };
 
 pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> ProgramResult {

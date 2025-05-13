@@ -1,6 +1,5 @@
 use crate::processor::{process_deposit, process_redeem_shares};
 use crate::state::Vault;
-use cvlr::nondet::nondet_with;
 use cvlr::prelude::*;
 use cvlr_solana::cvlr_deserialize_nondet_accounts;
 use solana_program::account_info::next_account_info;
