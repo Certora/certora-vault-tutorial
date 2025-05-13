@@ -95,6 +95,7 @@ mod tests {
             shares: 100u64.into(),
             assets: 100u64.into(),
             vault_assets_account: Pubkey::default(),
+            vault_assets_account_bump: 0,
             fee_amount: 0u64.into(),
             fee_bps: 500u64.into(), // 5%
             fee_token_account: Pubkey::default(),

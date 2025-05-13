@@ -1,11 +1,13 @@
 use {
     crate::{
-        state::Vault,
+        state::{create_vault_assets_account_address, Vault},
         utils::guards::{require, require_eq},
     },
     solana_program::{
         account_info::{next_account_info, AccountInfo},
+        entrypoint::ProgramResult,
         program_error::ProgramError,
+        pubkey::Pubkey,
     },
     std::{
         cell::{Ref, RefMut},
@@ -93,11 +95,40 @@ impl<'info> VaultInfo<'info> {
     }
 }
 
+pub struct VaultAssetsAccount<'info> {
+    pub info: AccountInfo<'info>,
+}
+
+impl<'info> VaultAssetsAccount<'info> {
+    pub fn validate(self) -> Result<Self, ProgramError> {
+        Ok(self)
+    }
+
+    pub fn check_vault(&self, vault_pk: &Pubkey, vault: &Vault) -> ProgramResult {
+        let expected_pk = create_vault_assets_account_address(vault_pk, vault)?;
+        require_eq!(self.info.key, &expected_pk, ProgramError::InvalidArgument);
+        Ok(())
+    }
+}
+
+impl<'info> AsRef<AccountInfo<'info>> for VaultAssetsAccount<'info> {
+    fn as_ref(&self) -> &AccountInfo<'info> {
+        &self.info
+    }
+}
+
+impl<'info> TryFrom<&AccountInfo<'info>> for VaultAssetsAccount<'info> {
+    type Error = ProgramError;
+    fn try_from(info: &AccountInfo<'info>) -> Result<Self, Self::Error> {
+        Self { info: info.clone() }.validate()
+    }
+}
+
 pub struct DepositContext<'info> {
     // the vault
     pub vault_info: VaultInfo<'info>,
     // token account of the vault deposit
-    pub vault_assets_account: AccountInfo<'info>,
+    pub vault_assets_account: VaultAssetsAccount<'info>,
     // mint for assets token
     pub assets_mint: AccountInfo<'info>,
     pub shares_mint: AccountInfo<'info>,
@@ -127,9 +158,12 @@ impl<'info> DepositContext<'info> {
 
         require_eq!(
             &vault.vault_assets_account,
-            self.vault_assets_account.key,
+            self.vault_assets_account.as_ref().key,
             ProgramError::InvalidArgument
         );
+
+        self.vault_assets_account
+            .check_vault(self.vault_info.as_ref().key, &vault)?;
 
         drop(vault);
         Ok(self)
@@ -139,7 +173,7 @@ impl<'info> DepositContext<'info> {
         let iter = &mut accounts.iter();
         Self {
             vault_info: next_account_info(iter)?.try_into()?,
-            vault_assets_account: next_account_info(iter)?.clone(),
+            vault_assets_account: next_account_info(iter)?.try_into()?,
             assets_mint: next_account_info(iter)?.clone(),
             shares_mint: next_account_info(iter)?.clone(),
             user_assets_account: next_account_info(iter)?.clone(),

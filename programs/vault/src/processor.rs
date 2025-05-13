@@ -27,7 +27,7 @@ pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> ProgramResult {
     } = DepositContext::load(accounts)?;
 
     require_ne!(
-        vault_assets_account.key,
+        vault_assets_account.as_ref().key,
         user_assets_account.key,
         crate::errors::VaultError::SelfTransfer.into()
     );
@@ -39,7 +39,7 @@ pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> ProgramResult {
 
     spl_transfer_assets_from_user(
         effect.assets_to_vault,
-        &vault_assets_account,
+        vault_assets_account.as_ref(),
         &user_assets_account,
         &assets_mint,
         authority.as_ref(),

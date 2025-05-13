@@ -1,5 +1,5 @@
 use bytemuck::{Pod, Zeroable};
-use solana_program::pubkey::Pubkey;
+use solana_program::pubkey::{Pubkey, PubkeyError};
 
 use crate::utils::math::FeeBps;
 use crate::utils::{
@@ -19,11 +19,12 @@ pub struct Vault {
     pub shares: PodU64,
     pub assets: PodU64,
 
-    pub vault_assets_account: Pubkey,
-
     pub fee_bps: PodU64,
     pub fee_amount: PodU64,
     pub fee_token_account: Pubkey,
+
+    pub vault_assets_account: Pubkey,
+    pub vault_assets_account_bump: u8,
 }
 
 impl Vault {
@@ -128,4 +129,30 @@ impl Vault {
         require_ne!(self.assets_mint, self.shares_mint, VaultError::GuardFail);
         Ok(())
     }
+}
+
+/// Seeds for the PDA vault token account
+#[macro_export]
+macro_rules! vault_assets_account_seeds {
+    ($vault_pk: expr) => {
+        &[b"assets", vault_pk.as_ref()]
+    };
+}
+
+/// Seeds for the PDA vault token account with seeds
+#[macro_export]
+macro_rules! vault_assets_account_seeds_with_bump {
+    ( $vault_pk:expr, $bump:expr ) => {
+        &[b"assets", $vault_pk.as_ref(), &[$bump]]
+    };
+}
+
+pub fn create_vault_assets_account_address(
+    vault_pk: &Pubkey,
+    vault: &Vault,
+) -> Result<Pubkey, PubkeyError> {
+    Pubkey::create_program_address(
+        vault_assets_account_seeds_with_bump!(vault_pk, vault.vault_assets_account_bump),
+        &crate::ID,
+    )
 }
