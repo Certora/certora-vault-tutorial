@@ -52,4 +52,3 @@ impl CvlrProp for SolvencyInvariant {
         cvlr_assert_le!(self.shares_total, self.token_total);
     }
 }
-

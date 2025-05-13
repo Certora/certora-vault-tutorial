@@ -26,7 +26,7 @@ mod log {
             cvlr_log_with("\tvault_shares_total", &self.vault_shares_total, logger);
             cvlr_log_with("\tmint_shares_total", &self.mint_shares_total, logger);
         }
-    }   
+    }
 }
 
 /// Vault's recorded asset/shares amount is consistent with the actual token balances in its associated SPL Token accounts.

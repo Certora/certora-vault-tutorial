@@ -1,9 +1,6 @@
 use crate::certora::specs::base::{
-    base_deposit_assets, 
-    base_deposit_assets_with_fee, 
-    base_redeem_shares, 
-    base_update_reward, 
-    base_process_slash
+    base_deposit_assets, base_deposit_assets_with_fee, base_process_slash, base_redeem_shares,
+    base_update_reward,
 };
 use crate::certora::specs::no_dilution::props::NoDilutionProp;
 use cvlr::prelude::*;

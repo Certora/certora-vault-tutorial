@@ -21,7 +21,6 @@ mod log {
             cvlr_log_with("\tshares_total", &self.shares_total, logger);
         }
     }
-
 }
 
 /// Solvency is an invariant: the vault can never have more shares than tokens.
@@ -41,4 +40,3 @@ impl CvlrProp for SolvencyInvariant {
         cvlr_assert_le!(self.shares_total, self.token_total);
     }
 }
-

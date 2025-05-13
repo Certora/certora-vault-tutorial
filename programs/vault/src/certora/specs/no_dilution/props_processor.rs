@@ -1,7 +1,7 @@
 use crate::certora::specs::base_processor::CvlrProp;
 use crate::state::Vault;
 use cvlr::mathint::NativeInt;
-use cvlr::{cvlr_assume, cvlr_assert_le};
+use cvlr::{cvlr_assert_le, cvlr_assume};
 use solana_program::account_info::AccountInfo;
 use std::mem::size_of;
 
@@ -31,8 +31,6 @@ fn safe_assumptions(vault: &Vault) {
 
 /// "no dilution" is a desired property for some operations: the ratio token_total / shares_total cannot decrease.
 impl CvlrProp for NoDilutionProp {
-    
-
     fn new(
         vault_info_account: &AccountInfo,
         _vault_assets_account: &AccountInfo,
@@ -61,4 +59,3 @@ impl CvlrProp for NoDilutionProp {
         );
     }
 }
-

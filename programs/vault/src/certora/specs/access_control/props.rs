@@ -49,7 +49,6 @@ mod log {
     }
 }
 
-
 impl CvlrProp for AccessControlProcessDeposit {
     fn new(
         vault_info_account: &AccountInfo,

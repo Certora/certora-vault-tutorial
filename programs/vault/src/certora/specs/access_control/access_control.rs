@@ -1,6 +1,5 @@
 use crate::certora::specs::{
-    base_processor::base_process_deposit,
-    access_control::props::AccessControlProcessDeposit,
+    access_control::props::AccessControlProcessDeposit, base_processor::base_process_deposit,
 };
 use cvlr::prelude::*;
 use cvlr_solana::cvlr_deserialize_nondet_accounts;

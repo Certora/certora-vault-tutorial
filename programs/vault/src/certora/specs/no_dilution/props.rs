@@ -1,8 +1,8 @@
 use crate::certora::specs::base::{CvlrProp, OperationParams};
 use crate::operations::VaultEffect;
 use crate::state::Vault;
-use cvlr::mathint::NativeInt;
 use cvlr::cvlr_assert_le;
+use cvlr::mathint::NativeInt;
 
 pub struct NoDilutionProp {
     shares_total: NativeInt,
