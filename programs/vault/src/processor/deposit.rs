@@ -21,11 +21,11 @@ pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> ProgramResult {
         spl_token_program,
     } = DepositContext::load(accounts)?;
 
-    require_ne!(
+    /*require_ne!(
         vault_assets_account.as_ref().key,
         user_assets_account.key,
         crate::errors::VaultError::SelfTransfer.into()
-    );
+    );*/
 
     let effect = {
         let mut vault = vault_info.get_mut()?;
