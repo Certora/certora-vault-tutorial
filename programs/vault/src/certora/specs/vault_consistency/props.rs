@@ -1,7 +1,7 @@
 use crate::certora::specs::base_processor::CvlrProp;
 use crate::state::Vault;
 use cvlr::mathint::NativeInt;
-use cvlr::{cvlr_assert_eq, cvlr_assume};
+use cvlr::{cvlr_assert_eq, cvlr_assert_le, cvlr_assume};
 use solana_program::account_info::AccountInfo;
 use std::mem::size_of;
 
@@ -58,12 +58,12 @@ impl CvlrProp for VaultConsistencyInvariant {
     }
 
     fn assume_pre(&self) {
-        cvlr_assume!(self.vault_token_total == self.account_token_total);
+        cvlr_assume!(self.vault_token_total <= self.account_token_total);
         cvlr_assume!(self.vault_shares_total == self.mint_shares_total);
     }
 
     fn check_post(&self, _old: &Self) {
-        cvlr_assert_eq!(self.vault_token_total, self.account_token_total);
-        cvlr_assume!(self.vault_shares_total == self.mint_shares_total);
+        cvlr_assert_le!(self.vault_token_total, self.account_token_total);
+        cvlr_assert_eq!(self.vault_shares_total, self.mint_shares_total);
     }
 }
