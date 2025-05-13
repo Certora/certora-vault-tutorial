@@ -41,7 +41,9 @@ pub fn vault_update_reward(vault: &mut Vault, new_amt: u64) -> VaultResult<Vault
         .checked_sub(vault.num_assets())
         .ok_or(VaultError::MathOverflow)?;
 
-    vault.add_token(reward)?;
+    if reward > 0 {
+        vault.add_token(reward)?;
+    }
 
     Ok(VaultEffect::default())
 }
