@@ -1,3 +1,5 @@
+use cvlr_solana::pubkey::Pk;
+use cvlr::prelude::*;
 use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
 };
@@ -10,6 +12,10 @@ pub fn spl_transfer_assets_from_user<'a>(
     authority: &AccountInfo<'a>,
     _spl_token_program: &AccountInfo<'a>,
 ) -> ProgramResult {
+    clog!("transfering assets from user");
+    clog!(&Pk(vault_assets.key) => "vault assets key");
+    clog!(&Pk(user_assets.key) => "user token key");
+
     // We can use `spl_token_program` to know which token version we are and call either spl_token_transfer or spl_token_2022_transfer.
     // However, our mocks for spl_token_transfer and spl_token_2022_transfer are the same.
     cvlr_solana::token::spl_token_2022_transfer(user_assets, vault_assets, authority, amount)
