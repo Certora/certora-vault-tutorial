@@ -1,4 +1,11 @@
-use super::{base::*, props::*};
+use crate::certora::specs::base::{
+    base_deposit_assets, 
+    base_deposit_assets_with_fee, 
+    base_redeem_shares, 
+    base_update_reward, 
+    base_process_slash
+};
+use crate::certora::specs::no_dilution::props::NoDilutionProp;
 use cvlr::prelude::*;
 
 #[rule]

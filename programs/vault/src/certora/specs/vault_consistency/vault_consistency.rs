@@ -1,5 +1,5 @@
 use crate::certora::specs::base_processor::{base_process_deposit, base_process_redeem_shares};
-use crate::certora::specs::props_processor::VaultConsistencyInvariant;
+use crate::certora::specs::vault_consistency::props::VaultConsistencyInvariant;
 use cvlr::prelude::*;
 use cvlr_solana::cvlr_deserialize_nondet_accounts;
 

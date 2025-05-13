@@ -1,7 +1,7 @@
 use crate::certora::specs::base_processor::{
     base_process_deposit, base_process_redeem_shares, base_process_update_reward,
 };
-use crate::certora::specs::props_processor::SolvencyInvariant;
+use crate::certora::specs::solvency::props_processor::SolvencyInvariant;
 use cvlr::prelude::*;
 use cvlr_solana::cvlr_deserialize_nondet_accounts;
 
