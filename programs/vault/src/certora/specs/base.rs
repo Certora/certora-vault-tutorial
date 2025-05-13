@@ -42,6 +42,7 @@ pub fn base_deposit_assets_with_fee<C: CvlrProp>() {
     pre.assume_pre();
 
     let token_amount = nondet();
+    clog!(token_amount);
     let effect = vault_deposit_assets_with_fee(&mut vault, token_amount).unwrap();
 
     let post = C::new(&vault);
