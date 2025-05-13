@@ -41,6 +41,17 @@ pub fn vault_deposit_assets_with_fee(vault: &mut Vault, tkn_amt: u64) -> VaultRe
     })
 }
 
+pub fn vault_collect_fee(vault: &mut Vault) -> VaultResult<VaultEffect> {
+    let fee_amount = vault.fee_amount();
+
+    vault.clear_fee_amount();
+
+    Ok(VaultEffect {
+        assets_to_user: fee_amount,
+        ..Default::default()
+    })
+}
+
 pub fn vault_redeem_shares(vault: &mut Vault, shares_amt: u64) -> VaultResult<VaultEffect> {
     let assets_to_user = vault.convert_shares_to_assets(shares_amt)?;
     vault.burn_shares(shares_amt)?;
@@ -84,6 +95,7 @@ mod tests {
             shares: 100u64.into(),
             assets: 100u64.into(),
             vault_assets_account: Pubkey::default(),
+            fee_amount: 0u64.into(),
             fee_bps: 500u64.into(), // 5%
             fee_token_account: Pubkey::default(),
         }

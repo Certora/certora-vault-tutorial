@@ -2,7 +2,7 @@ use solana_program::{
     account_info::AccountInfo, entrypoint::ProgramResult, program_error::ProgramError,
 };
 
-pub fn spl_transfer_assets_to_vault<'a>(
+pub fn spl_transfer_assets_from_user<'a>(
     amount: u64,
     vault_assets: &AccountInfo<'a>,
     user_assets: &AccountInfo<'a>,
@@ -35,15 +35,14 @@ pub fn spl_burn_shares<'a>(
     cvlr_solana::token::spl_burn(mint, user_shares_account, authority, amount)
 }
 
-pub fn spl_transfer_assets_to_user<'a>(
+pub fn spl_transfer_assets_from_vault<'a>(
     amount: u64,
     vault_assets: &AccountInfo<'a>,
     user_assets: &AccountInfo<'a>,
     _mint: &AccountInfo<'a>,
-    authority: &AccountInfo<'a>,
     _spl_token_program: &AccountInfo<'a>,
 ) -> ProgramResult {
-    cvlr_solana::token::spl_token_2022_transfer(vault_assets, user_assets, authority, amount)
+    cvlr_solana::token::spl_token_2022_transfer(vault_assets, user_assets, vault_assets, amount)
 }
 
 pub fn spl_token_account_amount(info: &AccountInfo) -> Result<u64, ProgramError> {

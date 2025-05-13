@@ -22,6 +22,7 @@ pub struct Vault {
     pub vault_assets_account: Pubkey,
 
     pub fee_bps: PodU64,
+    pub fee_amount: PodU64,
     pub fee_token_account: Pubkey,
 }
 
@@ -36,6 +37,19 @@ impl Vault {
 
     pub fn num_assets(&self) -> u64 {
         self.assets.into()
+    }
+
+    pub fn fee_amount(&self) -> u64 {
+        self.fee_amount.into()
+    }
+
+    pub fn clear_fee_amount(&mut self) {
+        self.fee_amount = 0u64.into();
+    }
+
+    pub fn gross_assets(&self) -> u64 {
+        // -- guaranteed to not overflow
+        self.num_assets().checked_add(self.fee_amount()).unwrap()
     }
 
     pub fn fee_in_bps(&self) -> VaultResult<FeeBps> {

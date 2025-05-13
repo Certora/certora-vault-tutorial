@@ -14,6 +14,7 @@ impl cvlr::nondet::Nondet for Vault {
             assets: u64::nondet().into(),
             vault_assets_account: cvlr_nondet_pubkey(),
             fee_bps: nondet_with(|x: &u64| *x <= MAX_FEE_BPS).into(),
+            fee_amount: u64::nondet().into(),
             fee_token_account: cvlr_nondet_pubkey(),
         }
     }

@@ -3,8 +3,14 @@ use solana_program::{
 };
 
 use crate::{
-    loaders::{DepositContext, RedeemSharesContext, UpdateRewardContext},
-    operations::{vault_deposit_assets, vault_redeem_shares, vault_update_reward},
+    loaders::{
+        CollectFeeContext, DepositContext, DepositWithFeeContext, RedeemSharesContext,
+        UpdateRewardContext,
+    },
+    operations::{
+        vault_collect_fee, vault_deposit_assets, vault_deposit_assets_with_fee,
+        vault_redeem_shares, vault_update_reward,
+    },
     utils::guards::require_ne,
 };
 
@@ -31,7 +37,7 @@ pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> ProgramResult {
         vault_deposit_assets(&mut vault, amount).map_err(|e| -> ProgramError { e.into() })?
     };
 
-    spl_transfer_assets_to_vault(
+    spl_transfer_assets_from_user(
         effect.assets_to_vault,
         &vault_assets_account,
         &user_assets_account,
@@ -45,6 +51,88 @@ pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> ProgramResult {
         &user_shares_account,
         &shares_mint,
         authority.as_ref(),
+        spl_token_program.as_ref(),
+    )?;
+
+    Ok(())
+}
+
+pub fn process_deposit_with_fee(accounts: &[AccountInfo], amount: u64) -> ProgramResult {
+    let DepositWithFeeContext {
+        vault_info,
+        vault_assets_account,
+        vault_fee_account,
+        assets_mint,
+        shares_mint,
+        user_assets_account,
+        authority,
+        user_shares_account,
+        spl_token_program,
+    } = DepositWithFeeContext::load(accounts)?;
+
+    require_ne!(
+        vault_assets_account.key,
+        user_assets_account.key,
+        crate::errors::VaultError::SelfTransfer.into()
+    );
+
+    let effect = {
+        let mut vault = vault_info.get_mut()?;
+        vault_deposit_assets_with_fee(&mut vault, amount)
+            .map_err(|e| -> ProgramError { e.into() })?
+    };
+
+    // -- transfer assets into vault
+    spl_transfer_assets_from_user(
+        effect.assets_to_vault,
+        &vault_assets_account,
+        &user_assets_account,
+        &assets_mint,
+        authority.as_ref(),
+        spl_token_program.as_ref(),
+    )?;
+
+    // -- transfer fee from user to vault
+    spl_transfer_assets_from_user(
+        effect.assets_to_fee,
+        &vault_fee_account,
+        &user_assets_account,
+        &assets_mint,
+        authority.as_ref(),
+        spl_token_program.as_ref(),
+    )?;
+
+    spl_mint_shares(
+        effect.shares_to_user,
+        &user_shares_account,
+        &shares_mint,
+        authority.as_ref(),
+        spl_token_program.as_ref(),
+    )?;
+
+    Ok(())
+}
+
+pub fn process_collect_fee(accounts: &[AccountInfo]) -> ProgramResult {
+    let CollectFeeContext {
+        vault_info,
+        vault_assets_account,
+        assets_mint,
+        fee_collect_account,
+        authority: _,
+        spl_token_program,
+    } = CollectFeeContext::load(accounts)?;
+
+    let effect = {
+        let mut vault = vault_info.get_mut()?;
+        vault_collect_fee(&mut vault)?
+    };
+
+    spl_transfer_assets_from_vault(
+        effect.assets_to_user,
+        &vault_assets_account,
+        &fee_collect_account,
+        &assets_mint,
         spl_token_program.as_ref(),
     )?;
 
@@ -83,12 +171,11 @@ pub fn process_redeem_shares(accounts: &[AccountInfo], amount: u64) -> ProgramRe
         spl_token_program.as_ref(),
     )?;
 
-    spl_transfer_assets_to_user(
+    spl_transfer_assets_from_vault(
         effect.assets_to_user,
         &vault_assets_account,
         &user_assets_account,
         &assets_mint,
-        authority.as_ref(),
         spl_token_program.as_ref(),
     )?;
 
@@ -116,8 +203,9 @@ pub fn process_update_reward(accounts: &[AccountInfo]) -> ProgramResult {
     Ok(())
 }
 
-#[cfg_attr(feature = "certora", cvlr::mock_fn(with=crate::certora::mocks::processor::spl_transfer_assets_to_vault))]
-pub fn spl_transfer_assets_to_vault(
+#[cfg_attr(feature = "certora", 
+    cvlr::mock_fn(with=crate::certora::mocks::processor::spl_transfer_assets_from_user))]
+pub fn spl_transfer_assets_from_user(
     _amount: u64,
     _vault_assets: &AccountInfo,
     _user_assets: &AccountInfo,
@@ -129,7 +217,8 @@ pub fn spl_transfer_assets_to_vault(
     Ok(())
 }
 
-#[cfg_attr(feature = "certora", cvlr::mock_fn(with=crate::certora::mocks::processor::spl_mint_shares))]
+#[cfg_attr(feature = "certora", 
+    cvlr::mock_fn(with=crate::certora::mocks::processor::spl_mint_shares))]
 pub fn spl_mint_shares(
     _amount: u64,
     _user_shares_account: &AccountInfo,
@@ -141,7 +230,8 @@ pub fn spl_mint_shares(
     Ok(())
 }
 
-#[cfg_attr(feature = "certora", cvlr::mock_fn(with=crate::certora::mocks::processor::spl_burn_shares))]
+#[cfg_attr(feature = "certora", 
+    cvlr::mock_fn(with=crate::certora::mocks::processor::spl_burn_shares))]
 pub fn spl_burn_shares(
     _amount: u64,
     _user_shares_account: &AccountInfo,
@@ -153,13 +243,13 @@ pub fn spl_burn_shares(
     Ok(())
 }
 
-#[cfg_attr(feature = "certora", cvlr::mock_fn(with=crate::certora::mocks::processor::spl_transfer_assets_to_user))]
-pub fn spl_transfer_assets_to_user(
+#[cfg_attr(feature = "certora", 
+    cvlr::mock_fn(with=crate::certora::mocks::processor::spl_transfer_assets_from_vault))]
+pub fn spl_transfer_assets_from_vault(
     _amount: u64,
     _vault_assets: &AccountInfo,
     _user_assets: &AccountInfo,
     _mint: &AccountInfo,
-    _authority: &AccountInfo,
     _spl_token_program: &AccountInfo,
 ) -> ProgramResult {
     // Use PDA as vault assets owner
