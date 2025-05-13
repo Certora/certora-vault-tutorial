@@ -230,3 +230,42 @@ impl<'info> UpdateRewardContext<'info> {
         .validate()
     }
 }
+
+pub struct SlashContext<'info> {
+    pub vault_info: VaultInfo<'info>,
+    pub vault_assets_account: VaultAssetsAccount<'info>,
+    pub user_token_account: AccountInfo<'info>,
+    pub assets_mint: AccountInfo<'info>,
+    pub authority: Signer<'info>,
+    pub spl_token_program: SplTokenProgramInfo<'info>,
+}
+
+impl<'info> SlashContext<'info> {
+    pub fn validate(self) -> Result<Self, ProgramError> {
+        let vault_pk = self.vault_info.as_ref().key;
+        let vault = self.vault_info.get()?;
+
+        require_eq!(
+            &vault.slash_admin,
+            self.authority.as_ref().key,
+            ProgramError::InvalidArgument
+        );
+
+        self.vault_assets_account.check_vault(vault_pk, &vault)?;
+
+        drop(vault);
+        Ok(self)
+    }
+    pub fn load(accounts: &[AccountInfo<'info>]) -> Result<Self, ProgramError> {
+        let iter = &mut accounts.iter();
+        Self {
+            vault_info: next_account_info(iter)?.try_into()?,
+            vault_assets_account: next_account_info(iter)?.try_into()?,
+            user_token_account: next_account_info(iter)?.clone(),
+            assets_mint: next_account_info(iter)?.clone(),
+            authority: next_account_info(iter)?.try_into()?,
+            spl_token_program: next_account_info(iter)?.try_into()?,
+        }
+        .validate()
+    }
+}

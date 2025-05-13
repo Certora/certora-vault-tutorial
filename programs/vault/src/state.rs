@@ -13,6 +13,7 @@ use spl_pod::primitives::PodU64;
 #[derive(Default, Pod, Copy, Clone, Zeroable)]
 pub struct Vault {
     pub admin: Pubkey,
+    pub slash_admin: Pubkey,
     pub shares_mint: Pubkey,
     pub assets_mint: Pubkey,
 

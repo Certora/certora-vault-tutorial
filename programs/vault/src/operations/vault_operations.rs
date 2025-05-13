@@ -64,6 +64,7 @@ mod tests {
     fn new_test_vault() -> Vault {
         Vault {
             admin: Pubkey::default(),
+            slash_admin: Pubkey::default(),
             shares_mint: Pubkey::default(),
             assets_mint: Pubkey::default(),
             shares: 100u64.into(),

@@ -8,6 +8,7 @@ impl cvlr::nondet::Nondet for Vault {
     fn nondet() -> Self {
         Self {
             admin: cvlr_nondet_pubkey(),
+            slash_admin: cvlr_nondet_pubkey(),
             shares_mint: cvlr_nondet_pubkey(),
             assets_mint: cvlr_nondet_pubkey(),
             shares: u64::nondet().into(),
