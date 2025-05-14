@@ -22,29 +22,26 @@ mod log {
     impl CvlrLog for AccessControlProcessDeposit {
         #[inline(always)]
         fn log(&self, tag: &str, logger: &mut cvlr::log::CvlrLogger) {
-            cvlr_log_with("", &tag, logger);
+            logger.log_scope_start(tag);
             cvlr_log_with(
-                "\tvault_assets_account_key",
+                "vault_assets_account_key",
                 &Pk(&self.vault_assets_account_key),
                 logger,
             );
             cvlr_log_with(
-                "\tvault_assets_mint_key",
+                "vault_assets_mint_key",
                 &Pk(&self.vault_assets_mint_key),
                 logger,
             );
             cvlr_log_with(
-                "\tvault_shares_mint_key",
+                "vault_shares_mint_key",
                 &Pk(&self.vault_shares_mint_key),
                 logger,
             );
-            cvlr_log_with(
-                "\tassets_account_key",
-                &Pk(&self.assets_account_key),
-                logger,
-            );
-            cvlr_log_with("\tassets_mint_key", &Pk(&self.assets_mint_key), logger);
-            cvlr_log_with("\tshares_mint_key", &Pk(&self.shares_mint_key), logger);
+            cvlr_log_with("assets_account_key", &Pk(&self.assets_account_key), logger);
+            cvlr_log_with("assets_mint_key", &Pk(&self.assets_mint_key), logger);
+            cvlr_log_with("shares_mint_key", &Pk(&self.shares_mint_key), logger);
+            logger.log_scope_end(tag);
         }
     }
 }
