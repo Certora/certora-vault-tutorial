@@ -28,6 +28,10 @@ pub fn spl_mint_shares<'a>(
     authority: &AccountInfo<'a>,
     _spl_token_program: &AccountInfo<'a>,
 ) -> ProgramResult {
+    clog!("minting shares");
+    clog!(&Pk(user_shares_account.key) => "user shares account key");
+    clog!(&Pk(mint.key) => "mint key");
+
     cvlr_solana::token::spl_mint_to(mint, user_shares_account, authority, amount)
 }
 
@@ -38,6 +42,10 @@ pub fn spl_burn_shares<'a>(
     authority: &AccountInfo<'a>,
     _spl_token_program: &AccountInfo<'a>,
 ) -> ProgramResult {
+    clog!("burning shares");
+    clog!(&Pk(user_shares_account.key) => "user shares account key");
+    clog!(&Pk(mint.key) => "mint key");
+
     cvlr_solana::token::spl_burn(mint, user_shares_account, authority, amount)
 }
 
@@ -48,6 +56,10 @@ pub fn spl_transfer_assets_from_vault<'a>(
     _mint: &AccountInfo<'a>,
     _spl_token_program: &AccountInfo<'a>,
 ) -> ProgramResult {
+    clog!("transfering assets from vault");
+    clog!(&Pk(vault_assets.key) => "vault assets key");
+    clog!(&Pk(user_assets.key) => "user token key");
+
     cvlr_solana::token::spl_token_2022_transfer(vault_assets, user_assets, vault_assets, amount)
 }
 
