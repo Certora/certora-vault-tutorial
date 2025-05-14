@@ -26,6 +26,6 @@ pub fn rule_solvency_update_reward() {
 }
 
 #[rule]
-pub fn rule_solvency_process_slash() {
+pub fn rule_solvency_slash() {
     base_process_slash::<SolvencyInvariant>();
 }

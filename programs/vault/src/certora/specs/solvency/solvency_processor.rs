@@ -1,5 +1,5 @@
 use crate::certora::specs::base_processor::{
-    base_process_deposit, base_process_redeem_shares, base_process_update_reward,
+    base_process_deposit, base_process_redeem_shares, base_process_update_reward, base_process_slash,
 };
 use crate::certora::specs::solvency::props_processor::SolvencyInvariant;
 use cvlr::prelude::*;
@@ -21,4 +21,10 @@ pub fn rule_solvency_process_redeem_shares() {
 pub fn rule_solvency_process_update_reward() {
     let accs = cvlr_deserialize_nondet_accounts();
     base_process_update_reward::<SolvencyInvariant>(&accs);
+}
+
+#[rule]
+pub fn rule_solvency_process_slash() {
+    let accs = cvlr_deserialize_nondet_accounts();
+    base_process_slash::<SolvencyInvariant>(&accs);
 }

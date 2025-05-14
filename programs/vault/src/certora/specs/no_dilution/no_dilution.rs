@@ -27,6 +27,6 @@ pub fn rule_no_dilution_update_reward() {
 
 #[rule]
 /// It should produce a counterexample because slashing does not satisfy the "no dilution" property.
-pub fn rule_no_dilution_process_slash() {
+pub fn rule_no_dilution_slash() {
     base_process_slash::<NoDilutionProp>();
 }

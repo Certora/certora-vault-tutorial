@@ -6,10 +6,10 @@ use solana_program::account_info::AccountInfo;
 use std::mem::size_of;
 
 pub struct VaultConsistencyInvariant {
-    vault_token_total: NativeInt,
-    account_token_total: NativeInt,
-    vault_shares_total: NativeInt,
-    mint_shares_total: NativeInt,
+    vault_assets: NativeInt,
+    vault_shares: NativeInt,
+    account_tokens: NativeInt,
+    mint_shares: Option<NativeInt>,
 }
 
 mod log {
@@ -21,10 +21,10 @@ mod log {
         #[inline(always)]
         fn log(&self, tag: &str, logger: &mut cvlr::log::CvlrLogger) {
             cvlr_log_with("", &tag, logger);
-            cvlr_log_with("\tvault_token_total", &self.vault_token_total, logger);
-            cvlr_log_with("\taccount_token_total", &self.account_token_total, logger);
-            cvlr_log_with("\tvault_shares_total", &self.vault_shares_total, logger);
-            cvlr_log_with("\tmint_shares_total", &self.mint_shares_total, logger);
+            cvlr_log_with("\tvault_assets", &self.vault_assets, logger);
+            cvlr_log_with("\tvault_shares", &self.vault_shares, logger);
+            cvlr_log_with("\taccount_tokens", &self.account_tokens, logger);
+            cvlr_log_with("\tmint_shares", &self.mint_shares, logger);
         }
     }
 }
@@ -43,27 +43,28 @@ impl CvlrProp for VaultConsistencyInvariant {
         let data = vault_info_account.try_borrow_data().unwrap();
         let vault = bytemuck::from_bytes::<Vault>(&data[0..size_of::<Vault>()]);
 
-        // If shares_mint is not passed by the processor function then this property should not be applicable
-        cvlr::cvlr_assert!(shares_mint.is_some());
-
         Self {
-            vault_token_total: vault.num_assets().into(),
-            account_token_total: cvlr_solana::token::spl_token_account_get_amount(
-                vault_assets_account,
-            )
-            .into(),
-            vault_shares_total: vault.num_shares().into(),
-            mint_shares_total: cvlr_solana::token::spl_mint_get_supply(shares_mint.unwrap()).into(),
+            vault_assets: vault.num_assets().into(),
+            vault_shares: vault.num_shares().into(),
+            account_tokens: cvlr_solana::token::spl_token_account_get_amount(vault_assets_account).into(),
+            mint_shares: match shares_mint {
+                Some(mint) => Some(cvlr_solana::token::spl_mint_get_supply(mint).into()),
+                None => None
+            }
         }
     }
 
     fn assume_pre(&self) {
-        cvlr_assume!(self.vault_token_total <= self.account_token_total);
-        cvlr_assume!(self.vault_shares_total == self.mint_shares_total);
+        cvlr_assume!(self.vault_assets <= self.account_tokens);
+        if let Some(mint_shares) = self.mint_shares {
+            cvlr_assume!(self.vault_shares == mint_shares);
+        }
     }
 
     fn check_post(&self, _old: &Self) {
-        cvlr_assert_le!(self.vault_token_total, self.account_token_total);
-        cvlr_assert_eq!(self.vault_shares_total, self.mint_shares_total);
+        cvlr_assert_le!(self.vault_assets, self.account_tokens);
+        if let Some(mint_shares) = self.mint_shares {
+            cvlr_assert_eq!(self.vault_shares, mint_shares);
+        }
     }
 }
