@@ -1,4 +1,6 @@
-use crate::processor::{process_deposit, process_redeem_shares, process_slash, process_update_reward};
+use crate::processor::{
+    process_deposit, process_redeem_shares, process_slash, process_update_reward,
+};
 use cvlr::clog;
 use cvlr::log::CvlrLog;
 use cvlr::nondet;
@@ -130,7 +132,6 @@ pub fn base_process_update_reward<C: CvlrProp>(accounts: &[AccountInfo]) {
     post.check_post(&pre);
 }
 
-
 #[inline(always)]
 pub fn base_process_slash<C: CvlrProp>(accounts: &[AccountInfo]) {
     let iter = &mut accounts.iter();
@@ -163,7 +164,7 @@ pub fn base_process_slash<C: CvlrProp>(accounts: &[AccountInfo]) {
         Some(authority),
         None,
     );
-    
+
     clog!(pre, post);
     post.check_post(&pre);
 }

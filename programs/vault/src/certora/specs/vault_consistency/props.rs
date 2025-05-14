@@ -46,11 +46,12 @@ impl CvlrProp for VaultConsistencyInvariant {
         Self {
             vault_assets: vault.num_assets().into(),
             vault_shares: vault.num_shares().into(),
-            account_tokens: cvlr_solana::token::spl_token_account_get_amount(vault_assets_account).into(),
+            account_tokens: cvlr_solana::token::spl_token_account_get_amount(vault_assets_account)
+                .into(),
             mint_shares: match shares_mint {
                 Some(mint) => Some(cvlr_solana::token::spl_mint_get_supply(mint).into()),
-                None => None
-            }
+                None => None,
+            },
         }
     }
 

@@ -1,5 +1,6 @@
 use crate::certora::specs::base_processor::{
-    base_process_deposit, base_process_redeem_shares, base_process_update_reward, base_process_slash,
+    base_process_deposit, base_process_redeem_shares, base_process_slash,
+    base_process_update_reward,
 };
 use crate::certora::specs::no_dilution::props_processor::NoDilutionProp;
 use cvlr::prelude::*;
