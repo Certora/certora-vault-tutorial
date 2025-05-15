@@ -1,5 +1,6 @@
-use crate::processor::{process_deposit, process_redeem_shares};
+use crate::processor::{process_deposit, process_redeem_shares, process_slash};
 use crate::state::Vault;
+use cvlr::mathint::NativeInt;
 use cvlr::prelude::*;
 use cvlr_solana::cvlr_deserialize_nondet_accounts;
 use solana_program::account_info::next_account_info;
@@ -107,4 +108,33 @@ pub fn rule_redeem_assets_and_shares_monotonicity() {
     if total_assets_pre <= total_assets_post {
         cvlr_assert_le!(total_shares_pre, total_shares_post);
     }
+}
+
+#[rule]
+pub fn rule_slash_no_dilution() {
+    let accounts = cvlr_deserialize_nondet_accounts();
+    let iter = &mut accounts.iter();
+    let vault_info = next_account_info(iter).unwrap();
+
+    let total_assets_pre: NativeInt = get_vault_total_assets!(vault_info).into();
+    let total_shares_pre: NativeInt = get_vault_total_shares!(vault_info).into();
+
+    let amount = nondet();
+    process_slash(&accounts, amount).unwrap();
+
+    let total_assets_post: NativeInt = get_vault_total_assets!(vault_info).into();
+    let total_shares_post: NativeInt = get_vault_total_shares!(vault_info).into();
+
+    clog!(
+        total_assets_pre,
+        total_shares_pre,
+        total_assets_post,
+        total_shares_post
+    );
+
+    // the ratio total_assets / total_shares cannot decrease
+    cvlr_assert_le!(
+        total_assets_pre * total_shares_post,
+        total_shares_pre * total_assets_post
+    );
 }
