@@ -3,6 +3,29 @@
 This tutorial builds a simple Tokenized Vault, inspired by the  [ERC-4626
 TOKENIZED VAULT STANDARD](https://eips.ethereum.org/EIPS/eip-4626) on Ethereum.
 
+
+```mermaid
+flowchart TD
+    subgraph TokenAccounts["Token Accounts"]
+        AliceAssets["Alice assets<br/><br/>amount: 100"]
+        AliceShares["Alice shares<br/><br/>amount: 75"]
+        BobAssets["Bob assets<br/><br/>amount: 50"]
+        BobShares["Bob shares<br/><br/>amount: 25"]
+        VaultTokenAccount["Vault<br/><br/>amount: 250"]
+    end
+
+    subgraph MintAccounts["Mint Accounts"]
+        VaultAssetsMint["Vault assets mint<br/><br/>supply: 10_000"]
+        VaultSharesMint["Vault shares mint<br/><br/>supply: 100"]
+    end
+    subgraph Vault["Vault"]
+    VaultX["assets: 200<br/>shares: 100"]
+    end
+
+TokenAccounts --- Vault
+MintAccounts --- Vault
+```
+
 ## Content
 
 - [Code structure](#code-structure)
@@ -75,7 +98,7 @@ $$
 Monotonicity of assets and shares 
 
 
-$$\neg(\text{assets}_{\text{pre}} \leq \text{assets}_{\text{post}}) \vee \text{shares}_{\text{pre}}  \leq \text{shares}_{\text{post}}$$
+$$\text{assets}_{\text{pre}} \leq \text{assets}_{\text{post}} \implies \text{shares}_{\text{pre}}  \leq \text{shares}_{\text{post}}$$
 
 ### Vault consistency
 
@@ -111,13 +134,13 @@ $$ \text{shares} \leq \text{assets}$$
 If a fee rate is configured, then a corresponding fee must be
 deducted:
 
-$$ \neg(\text{fee}_{\text{bps}} > 0) \vee fee > 0 
+$$ \text{fee}_{\text{bps}} > 0 \implies \text{fee} > 0 
 $$
 
 
 ### Inflation attack
 
-TODO
+
 
 ## DISCLAIMER
 The code and examples provided in this repository are for educational purposes only. They are not production-ready and may contain bugs or security vulnerabilities. Use at your own risk.
