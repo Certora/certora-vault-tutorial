@@ -28,8 +28,16 @@ MintAccounts --- Vault
 
 ## Content
 
+- [Installation](#installation)
 - [Code structure](#code-structure)
 - [Specifications](#specifications)
+
+## Installation
+1. First, visit [Certora.com](https://www.certora.com) and sign up for a free account [here](https://www.certora.com/signup).
+2. You will receive an email with a temporary password and a personal access key. Use the password to login to Certora following the link in the email.
+3. During the workshop, we recommend following along by using Github Codespaces that you can launch from this repository.
+4. Once your codespace has launched, you should have a web-based editor that looks like VSCode.
+5. From the terminal of this editor, use the personal access key (from Step 2) to set a temporary environment variable like so `export CERTORAKEY=<personal_access_key>`.
 
 ## Code structure
 
