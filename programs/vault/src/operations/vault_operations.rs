@@ -12,6 +12,9 @@ pub struct VaultEffect {
 }
 
 pub fn vault_deposit_assets(vault: &mut Vault, tkn_amt: u64) -> VaultResult<VaultEffect> {
+    //let fee = vault.fee_in_bps()?;
+    //require!(fee.is_zero(), crate::errors::VaultError::GuardFail);
+
     let shares_to_user = vault.convert_assets_to_shares(tkn_amt)?;
 
     vault.mint_shares(shares_to_user)?;

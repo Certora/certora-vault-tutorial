@@ -81,6 +81,10 @@ impl TryFrom<u64> for FeeBps {
 }
 
 impl FeeBps {
+    pub fn is_zero(&self) -> bool {
+        self.0 == 0
+    }
+
     pub fn apply(&self, amt: u64) -> VaultResult<GrossAmount> {
         let fee = mul_div_floor(amt, self.0, ONE_IN_BPS)?;
         let net_amount = amt.checked_sub(fee).ok_or(VaultError::MathOverflow)?;
