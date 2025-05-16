@@ -1,5 +1,6 @@
 use crate::operations::VaultEffect;
 use crate::state::Vault;
+use crate::VaultError;
 /// Implementation for cvlr::log::CvlrLog trait
 use cvlr::log::cvlr_log_with;
 
@@ -23,5 +24,17 @@ impl cvlr::log::CvlrLog for VaultEffect {
         cvlr_log_with("shares_to_burn", &self.shares_to_burn, logger);
         cvlr_log_with("shares_to_user", &self.shares_to_user, logger);
         logger.log_scope_end(tag);
+    }
+}
+
+impl cvlr::log::CvlrLog for VaultError {
+    #[inline(always)]
+    fn log(&self, _tag: &str, logger: &mut cvlr::log::CvlrLogger) {
+        match self {
+            VaultError::Unspecified => logger.log("Unspecified"),
+            VaultError::MathOverflow => logger.log("MathOverflow"),
+            VaultError::GuardFail => logger.log("GuardFail"),
+            VaultError::SelfTransfer => logger.log("SelfTransfer"),
+        }
     }
 }
