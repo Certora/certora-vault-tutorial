@@ -20,11 +20,12 @@ mod log {
     impl CvlrLog for VaultConsistencyInvariant {
         #[inline(always)]
         fn log(&self, tag: &str, logger: &mut cvlr::log::CvlrLogger) {
-            cvlr_log_with("", &tag, logger);
-            cvlr_log_with("\tvault_assets", &self.vault_assets, logger);
-            cvlr_log_with("\tvault_shares", &self.vault_shares, logger);
-            cvlr_log_with("\taccount_tokens", &self.account_tokens, logger);
-            cvlr_log_with("\tmint_shares", &self.mint_shares, logger);
+            logger.log_scope_start(tag);
+            cvlr_log_with("vault_assets", &self.vault_assets, logger);
+            cvlr_log_with("vault_shares", &self.vault_shares, logger);
+            cvlr_log_with("account_tokens", &self.account_tokens, logger);
+            cvlr_log_with("mint_shares", &self.mint_shares, logger);
+            logger.log_scope_end(tag);
         }
     }
 }

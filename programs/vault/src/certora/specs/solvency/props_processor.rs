@@ -14,12 +14,14 @@ mod log {
     use super::*;
     use cvlr::log::cvlr_log_with;
     use cvlr::log::CvlrLog;
+
     impl CvlrLog for SolvencyInvariant {
         #[inline(always)]
         fn log(&self, tag: &str, logger: &mut cvlr::log::CvlrLogger) {
-            cvlr_log_with("", &tag, logger);
-            cvlr_log_with("\ttoken_total", &self.token_total, logger);
-            cvlr_log_with("\tshares_total", &self.shares_total, logger);
+            logger.log_scope_start(tag);
+            cvlr_log_with("token_total", &self.token_total, logger);
+            cvlr_log_with("shares_total", &self.shares_total, logger);
+            logger.log_scope_end(tag);
         }
     }
 }
