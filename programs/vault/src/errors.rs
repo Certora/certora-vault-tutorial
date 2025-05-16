@@ -1,6 +1,6 @@
 use solana_program::program_error::ProgramError;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum VaultError {
     Unspecified,
     MathOverflow,
