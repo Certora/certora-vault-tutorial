@@ -50,14 +50,14 @@ The main logic of the vault is organized as follows.
   These operations implement the vault's asset and shares logic
   (independent of Solana runtime):
 
-1. `vault_deposit_assets(tokens_amount)`
-2. `vault_redeem_shares(shares_amout)`
-3. `vault_update_reward(new_amount)`
-4. `vault_process_slash(slash_amount)`
+1. `vault_deposit_assets(vault, tokens_amount)`
+2. `vault_redeem_shares(vault, shares_amout)`
+3. `vault_update_reward(vault, new_amount)`
+4. `vault_process_slash(vault, slash_amount)`
 
 Additional functions that support fees:
 
-- `vault_deposit_assets_with_fee(tokens_amount)`
+- `vault_deposit_assets_with_fee(vault, tokens_amount)`
 - `vault_collect_fee`
 
 
@@ -93,20 +93,20 @@ Notation:
 
 ### Simple properties 
 
-Assets should not decrease:
+- Assets should not decrease:
 
 ```math
 \text{assets}_{\text{post}}  \geq \text{assets}_{\text{pre}}
 ```
 
 
-Shares should not decrease:
+- Shares should not decrease:
 
 ```math
 \text{shares}_{\text{post}}  \geq \text{shares}_{\text{pre}}
 ```
 
-Monotonicity of assets and shares 
+- Monotonicity of assets and shares 
 
 ```math
 \text{assets}_{\text{pre}} \leq \text{assets}_{\text{post}} \implies \text{shares}_{\text{pre}}  \leq \text{shares}_{\text{post}}
@@ -145,13 +145,20 @@ The vault needs to ensure the following invariant to remain solvent:
 
 ### Fees
 
-If a fee rate is configured, then a corresponding fee must be
-deducted:
+- If a fee rate is configured, then a corresponding fee must be
+deducted for any successful execution:
 
 ```math
 \text{fee}_{\text{bps}} > 0 \implies \text{fee} > 0 
 ```
 
+- Fee computation never reverts (liveness property)
+
+- If fee rate is not configurated then `deposit_assets` and `deposit_assets_with_fees` are equivalent 
+
+```math
+\text{fee}_{\text{bps}} > 0 \implies \forall~ vault, amount.~\text{deposit\_assets}(vault, amount) = \text{deposit\_assets\_with\_fees}(vault, amount)
+```
 
 ### Inflation attack
 
