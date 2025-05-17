@@ -69,6 +69,7 @@ mod tests {
             admin: Pubkey::default(),
             slash_admin: Pubkey::default(),
             shares_mint: Pubkey::default(),
+            vault_shares_mint_bump: 0,
             assets_mint: Pubkey::default(),
             shares: 100u64.into(),
             assets: 100u64.into(),

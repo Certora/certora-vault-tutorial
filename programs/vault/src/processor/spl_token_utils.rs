@@ -23,7 +23,6 @@ pub fn spl_mint_shares(
     _amount: u64,
     _user_shares_account: &AccountInfo,
     _mint: &AccountInfo,
-    _authority: &AccountInfo,
     _spl_token_program: &AccountInfo,
 ) -> ProgramResult {
     // CPI call. Use PDA as a mint authority

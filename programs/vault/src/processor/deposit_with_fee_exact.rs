@@ -58,7 +58,6 @@ pub fn process_deposit_with_fee_exact(accounts: &[AccountInfo], amount: u64) -> 
         effect.shares_to_user,
         &user_shares_account,
         &shares_mint,
-        authority.as_ref(),
         spl_token_program.as_ref(),
     )?;
 

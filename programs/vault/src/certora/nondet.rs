@@ -10,6 +10,7 @@ impl cvlr::nondet::Nondet for Vault {
             admin: cvlr_nondet_pubkey(),
             slash_admin: cvlr_nondet_pubkey(),
             shares_mint: cvlr_nondet_pubkey(),
+            vault_shares_mint_bump: nondet(),
             assets_mint: cvlr_nondet_pubkey(),
             shares: u64::nondet().into(),
             assets: u64::nondet().into(),

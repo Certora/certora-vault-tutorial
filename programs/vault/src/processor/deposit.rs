@@ -43,8 +43,7 @@ pub fn process_deposit(accounts: &[AccountInfo], amount: u64) -> ProgramResult {
     spl_mint_shares(
         effect.shares_to_user,
         &user_shares_account,
-        &shares_mint,
-        authority.as_ref(),
+        shares_mint.as_ref(),
         spl_token_program.as_ref(),
     )?;
 
