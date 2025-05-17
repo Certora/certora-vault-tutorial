@@ -15,6 +15,7 @@ pub struct Vault {
     pub admin: Pubkey,
     pub slash_admin: Pubkey,
     pub shares_mint: Pubkey,
+    pub vault_shares_mint_bump: u8,
     pub assets_mint: Pubkey,
 
     pub shares: PodU64,
@@ -136,7 +137,7 @@ impl Vault {
 #[macro_export]
 macro_rules! vault_assets_account_seeds {
     ($vault_pk: expr) => {
-        &[b"assets", vault_pk.as_ref()]
+        &[$crate::constants::VAULT_ASSETS, vault_pk.as_ref()]
     };
 }
 
@@ -144,7 +145,11 @@ macro_rules! vault_assets_account_seeds {
 #[macro_export]
 macro_rules! vault_assets_account_seeds_with_bump {
     ( $vault_pk:expr, $bump:expr ) => {
-        &[b"assets", $vault_pk.as_ref(), &[$bump]]
+        &[
+            $crate::constants::VAULT_ASSETS,
+            $vault_pk.as_ref(),
+            &[$bump],
+        ]
     };
 }
 
@@ -154,6 +159,32 @@ pub fn create_vault_assets_account_address(
 ) -> Result<Pubkey, PubkeyError> {
     Pubkey::create_program_address(
         vault_assets_account_seeds_with_bump!(vault_pk, vault.vault_assets_account_bump),
+        &crate::ID,
+    )
+}
+
+/// Seeds for the PDA vault mint account
+#[macro_export]
+macro_rules! vault_mint_seeds {
+    ($vault_pk: expr) => {
+        &[$crate::constants::SHARES_MINT, vault_pk.as_ref()]
+    };
+}
+
+/// Seeds for the PDA vault token account with seeds
+#[macro_export]
+macro_rules! vault_shares_mint_seeds_with_bump {
+    ( $vault_pk:expr, $bump:expr ) => {
+        &[$crate::constants::SHARES_MINT, $vault_pk.as_ref(), &[$bump]]
+    };
+}
+
+pub fn create_vault_shares_mint_address(
+    vault_pk: &Pubkey,
+    vault: &Vault,
+) -> Result<Pubkey, PubkeyError> {
+    Pubkey::create_program_address(
+        vault_shares_mint_seeds_with_bump!(vault_pk, vault.vault_shares_mint_bump),
         &crate::ID,
     )
 }

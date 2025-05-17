@@ -44,8 +44,7 @@ pub fn process_deposit_exact(accounts: &[AccountInfo], amount: u64) -> ProgramRe
     spl_mint_shares(
         effect.shares_to_user,
         &user_shares_account,
-        &shares_mint,
-        authority.as_ref(),
+        shares_mint.as_ref(),
         spl_token_program.as_ref(),
     )?;
 

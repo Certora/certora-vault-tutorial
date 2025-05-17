@@ -11,7 +11,7 @@ use solana_program::{
 };
 
 use crate::{
-    state::{create_vault_assets_account_address, Vault},
+    state::{create_vault_assets_account_address, create_vault_shares_mint_address, Vault},
     utils::guards::require_eq,
 };
 
@@ -89,6 +89,35 @@ impl<'info> TryFrom<&AccountInfo<'info>> for VaultAssetsAccount<'info> {
     }
 }
 
+pub struct VaultSharesMint<'info> {
+    pub info: AccountInfo<'info>,
+}
+
+impl<'info> VaultSharesMint<'info> {
+    pub fn validate(self) -> Result<Self, ProgramError> {
+        Ok(self)
+    }
+
+    pub fn check_vault(&self, vault_pk: &Pubkey, vault: &Vault) -> ProgramResult {
+        let expected_pk = create_vault_shares_mint_address(vault_pk, vault)?;
+        require_eq!(self.info.key, &expected_pk, ProgramError::InvalidArgument);
+        Ok(())
+    }
+}
+
+impl<'info> AsRef<AccountInfo<'info>> for VaultSharesMint<'info> {
+    fn as_ref(&self) -> &AccountInfo<'info> {
+        &self.info
+    }
+}
+
+impl<'info> TryFrom<&AccountInfo<'info>> for VaultSharesMint<'info> {
+    type Error = ProgramError;
+    fn try_from(info: &AccountInfo<'info>) -> Result<Self, Self::Error> {
+        Self { info: info.clone() }.validate()
+    }
+}
+
 pub struct DepositContext<'info> {
     // the vault
     pub vault_info: VaultInfo<'info>,
@@ -96,7 +125,7 @@ pub struct DepositContext<'info> {
     pub vault_assets_account: VaultAssetsAccount<'info>,
     // mint for assets token
     pub assets_mint: AccountInfo<'info>,
-    pub shares_mint: AccountInfo<'info>,
+    pub shares_mint: VaultSharesMint<'info>,
     // token account for the user making a deposit
     pub user_assets_account: AccountInfo<'info>,
     // signing authority for the user assets account
@@ -117,7 +146,7 @@ impl<'info> DepositContext<'info> {
 
         require_eq!(
             &vault.shares_mint,
-            self.shares_mint.key,
+            self.shares_mint.as_ref().key,
             ProgramError::InvalidArgument
         );
 
@@ -130,6 +159,9 @@ impl<'info> DepositContext<'info> {
         self.vault_assets_account
             .check_vault(self.vault_info.as_ref().key, &vault)?;
 
+        self.shares_mint
+            .check_vault(self.vault_info.as_ref().key, &vault)?;
+
         drop(vault);
         Ok(self)
     }
@@ -140,7 +172,7 @@ impl<'info> DepositContext<'info> {
             vault_info: next_account_info(iter)?.try_into()?,
             vault_assets_account: next_account_info(iter)?.try_into()?,
             assets_mint: next_account_info(iter)?.clone(),
-            shares_mint: next_account_info(iter)?.clone(),
+            shares_mint: next_account_info(iter)?.try_into()?,
             user_assets_account: next_account_info(iter)?.clone(),
             authority: next_account_info(iter)?.try_into()?,
             user_shares_account: next_account_info(iter)?.clone(),
@@ -154,7 +186,7 @@ pub struct RedeemSharesContext<'info> {
     pub vault_info: VaultInfo<'info>,
     pub vault_assets_account: AccountInfo<'info>,
     pub assets_mint: AccountInfo<'info>,
-    pub shares_mint: AccountInfo<'info>,
+    pub shares_mint: VaultSharesMint<'info>,
     pub user_shares_account: AccountInfo<'info>,
     pub authority: Signer<'info>,
     pub user_assets_account: AccountInfo<'info>,
@@ -172,7 +204,7 @@ impl<'info> RedeemSharesContext<'info> {
 
         require_eq!(
             &vault.shares_mint,
-            self.shares_mint.key,
+            self.shares_mint.as_ref().key,
             ProgramError::InvalidArgument
         );
 
@@ -191,7 +223,7 @@ impl<'info> RedeemSharesContext<'info> {
             vault_info: next_account_info(iter)?.try_into()?,
             vault_assets_account: next_account_info(iter)?.clone(),
             assets_mint: next_account_info(iter)?.clone(),
-            shares_mint: next_account_info(iter)?.clone(),
+            shares_mint: next_account_info(iter)?.try_into()?,
             user_shares_account: next_account_info(iter)?.clone(),
             authority: next_account_info(iter)?.try_into()?,
             user_assets_account: next_account_info(iter)?.clone(),
