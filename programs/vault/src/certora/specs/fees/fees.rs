@@ -37,8 +37,10 @@ pub fn rule_liveness_deposit_assets_with_fee() {
 
     safe_assumptions(&vault, token_amount);
 
-    let effect =
-        vault_deposit_assets_with_fee(&mut vault, token_amount).inspect(|effect| clog!(effect));
+    let effect = vault_deposit_assets_with_fee(&mut vault, token_amount).map(|effect| {
+        clog!(effect);
+        effect
+    });
 
     cvlr_assert!(effect.is_ok());
 }
