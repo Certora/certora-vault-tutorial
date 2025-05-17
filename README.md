@@ -157,7 +157,7 @@ deducted for any successful execution:
 - If fee rate is not configurated then `deposit_assets` and `deposit_assets_with_fees` are equivalent 
 
 ```math
-\text{fee}_{\text{bps}} > 0 \implies \forall~ vault, amount.~\text{deposit\_assets}(vault, amount) = \text{deposit\_assets\_with\_fees}(vault, amount)
+\text{fee}_{\text{bps}} = 0 \implies \forall~ vault, amount.~\text{deposit\_assets}(vault, amount) = \text{deposit\_assets\_with\_fees}(vault, amount)
 ```
 
 ### Inflation attack
