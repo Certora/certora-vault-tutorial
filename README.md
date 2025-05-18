@@ -26,6 +26,19 @@ TokenAccounts --- Vault
 MintAccounts --- Vault
 ```
 
+The basic operations of the vault are 
+  * `deposit` -- deposit assets and obtain shares
+  * `redeem` -- burn shares and obtain assets
+  * `reward` -- process reward that is accumulated in the vault asset account
+  * `slash` -- deduct some assets from the vault
+
+The basic functionality is extended to include:
+  * __fees__ -- fees are deducted in assets during deposit
+  * __fee collection__ -- fee is optionally stored in the vault and can be claimed by a designated operator
+  * __exact deposit__ -- only takes as much assets as needed to cover shares obtained by the user. This protects from an inflation attack.
+
+Throughout the tutorial, you are invited to add the missing functionality, and formally verify correctness of your implementation. Partial implementation of the features described above is provided as a reference.
+
 ## Content
 
 - [Installation](#installation)
@@ -161,6 +174,12 @@ deducted for any successful execution:
 ```
 
 ### Inflation attack
+
+An [inflation attack](https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks) is an attack on a tokenized vault in which an attacker inflates the share price, causing a victim to lose assets to the vault due to rounding. The attacker is then extract the profit by redeeming its shares in the vault.
+
+We show how to use Certora Prover to explore both the attack and different mitigation. Specifically, we show that when virtual shares and assets are used, the attacker cannot profit, but can still cause harm.
+
+We then propose a mitigation that limits rounding to 1 atom, but only extracting the exact amount of the assets from the user that is needed to cover the shares. We show that with this "exact" deposit, the loss (and therefore the win to the attacker) is limited to 1 atom.
 
 
 
