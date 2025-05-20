@@ -35,6 +35,7 @@ impl CvlrProp for VaultConsistencyInvariant {
     fn new(
         vault_info_account: &AccountInfo,
         vault_assets_account: &AccountInfo,
+        _vault_fee_account: Option<&AccountInfo>,
         _assets_mint: Option<&AccountInfo>,
         shares_mint: Option<&AccountInfo>,
         _user_assets_account: Option<&AccountInfo>,

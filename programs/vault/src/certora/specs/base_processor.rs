@@ -1,5 +1,6 @@
 use crate::processor::{
-    process_deposit, process_redeem_shares, process_slash, process_update_reward,
+    process_deposit, process_deposit_exact, process_deposit_with_fee,
+    process_deposit_with_fee_exact, process_redeem_shares, process_slash, process_update_reward,
 };
 use cvlr::clog;
 use cvlr::log::CvlrLog;
@@ -10,6 +11,7 @@ pub trait CvlrProp: CvlrLog {
     fn new(
         vault_info: &AccountInfo,
         vault_assets_account: &AccountInfo,
+        vault_fee_account: Option<&AccountInfo>,
         assets_mint: Option<&AccountInfo>,
         shares_mint: Option<&AccountInfo>,
         user_assets_account: Option<&AccountInfo>,
@@ -34,6 +36,7 @@ pub fn base_process_deposit<C: CvlrProp>(accounts: &[AccountInfo]) {
     let pre = C::new(
         vault_info,
         vault_assets_account,
+        None,
         Some(assets_mint),
         Some(shares_mint),
         Some(user_assets_account),
@@ -48,6 +51,132 @@ pub fn base_process_deposit<C: CvlrProp>(accounts: &[AccountInfo]) {
     let post = C::new(
         vault_info,
         vault_assets_account,
+        None,
+        Some(assets_mint),
+        Some(shares_mint),
+        Some(user_assets_account),
+        Some(authority),
+        Some(user_shares_account),
+    );
+
+    clog!(pre, post);
+    post.check_post(&pre);
+}
+
+#[inline(always)]
+pub fn base_process_deposit_with_fee<C: CvlrProp>(accounts: &[AccountInfo]) {
+    let iter = &mut accounts.iter();
+    let vault_info = next_account_info(iter).unwrap();
+    let vault_assets_account = next_account_info(iter).unwrap();
+    let vault_fee_account = next_account_info(iter).unwrap();
+    let assets_mint = next_account_info(iter).unwrap();
+    let shares_mint = next_account_info(iter).unwrap();
+    let user_assets_account = next_account_info(iter).unwrap();
+    let authority = next_account_info(iter).unwrap();
+    let user_shares_account = next_account_info(iter).unwrap();
+
+    let pre = C::new(
+        vault_info,
+        vault_assets_account,
+        Some(vault_fee_account),
+        Some(assets_mint),
+        Some(shares_mint),
+        Some(user_assets_account),
+        Some(authority),
+        Some(user_shares_account),
+    );
+    pre.assume_pre();
+
+    let amount = nondet();
+    process_deposit_with_fee(accounts, amount).unwrap();
+
+    let post = C::new(
+        vault_info,
+        vault_assets_account,
+        Some(vault_fee_account),
+        Some(assets_mint),
+        Some(shares_mint),
+        Some(user_assets_account),
+        Some(authority),
+        Some(user_shares_account),
+    );
+
+    clog!(pre, post);
+    post.check_post(&pre);
+}
+
+#[inline(always)]
+pub fn base_process_deposit_exact<C: CvlrProp>(accounts: &[AccountInfo]) {
+    let iter = &mut accounts.iter();
+    let vault_info = next_account_info(iter).unwrap();
+    let vault_assets_account = next_account_info(iter).unwrap();
+    let assets_mint = next_account_info(iter).unwrap();
+    let shares_mint = next_account_info(iter).unwrap();
+    let user_assets_account = next_account_info(iter).unwrap();
+    let authority = next_account_info(iter).unwrap();
+    let user_shares_account = next_account_info(iter).unwrap();
+
+    let pre = C::new(
+        vault_info,
+        vault_assets_account,
+        None,
+        Some(assets_mint),
+        Some(shares_mint),
+        Some(user_assets_account),
+        Some(authority),
+        Some(user_shares_account),
+    );
+    pre.assume_pre();
+
+    let amount = nondet();
+    process_deposit_exact(accounts, amount).unwrap();
+
+    let post = C::new(
+        vault_info,
+        vault_assets_account,
+        None,
+        Some(assets_mint),
+        Some(shares_mint),
+        Some(user_assets_account),
+        Some(authority),
+        Some(user_shares_account),
+    );
+
+    clog!(pre, post);
+    post.check_post(&pre);
+}
+
+#[inline(always)]
+pub fn base_process_deposit_with_fee_exact<C: CvlrProp>(accounts: &[AccountInfo]) {
+    let iter = &mut accounts.iter();
+    let vault_info = next_account_info(iter).unwrap();
+    let vault_assets_account = next_account_info(iter).unwrap();
+    let vault_fee_account = next_account_info(iter).unwrap();
+    let assets_mint = next_account_info(iter).unwrap();
+    let shares_mint = next_account_info(iter).unwrap();
+    let user_assets_account = next_account_info(iter).unwrap();
+    let authority = next_account_info(iter).unwrap();
+    let user_shares_account = next_account_info(iter).unwrap();
+
+    let pre = C::new(
+        vault_info,
+        vault_assets_account,
+        Some(vault_fee_account),
+        Some(assets_mint),
+        Some(shares_mint),
+        Some(user_assets_account),
+        Some(authority),
+        Some(user_shares_account),
+    );
+    pre.assume_pre();
+
+    let amount = nondet();
+    process_deposit_with_fee_exact(accounts, amount).unwrap();
+
+    let post = C::new(
+        vault_info,
+        vault_assets_account,
+        Some(vault_fee_account),
         Some(assets_mint),
         Some(shares_mint),
         Some(user_assets_account),
@@ -73,6 +202,7 @@ pub fn base_process_redeem_shares<C: CvlrProp>(accounts: &[AccountInfo]) {
     let pre = C::new(
         vault_info,
         vault_assets_account,
+        None,
         Some(assets_mint),
         Some(shares_mint),
         Some(user_assets_account),
@@ -88,6 +218,7 @@ pub fn base_process_redeem_shares<C: CvlrProp>(accounts: &[AccountInfo]) {
     let post = C::new(
         vault_info,
         vault_assets_account,
+        None,
         Some(assets_mint),
         Some(shares_mint),
         Some(user_assets_account),
@@ -113,6 +244,7 @@ pub fn base_process_update_reward<C: CvlrProp>(accounts: &[AccountInfo]) {
         None,
         None,
         None,
+        None,
     );
     pre.assume_pre();
 
@@ -121,6 +253,7 @@ pub fn base_process_update_reward<C: CvlrProp>(accounts: &[AccountInfo]) {
     let post = C::new(
         vault_info,
         vault_assets_account,
+        None,
         None,
         None,
         None,
@@ -144,6 +277,7 @@ pub fn base_process_slash<C: CvlrProp>(accounts: &[AccountInfo]) {
     let pre = C::new(
         vault_info,
         vault_assets_account,
+        None,
         Some(assets_mint),
         None,
         Some(user_assets_account),
@@ -158,6 +292,7 @@ pub fn base_process_slash<C: CvlrProp>(accounts: &[AccountInfo]) {
     let post = C::new(
         vault_info,
         vault_assets_account,
+        None,
         Some(assets_mint),
         None,
         Some(user_assets_account),
