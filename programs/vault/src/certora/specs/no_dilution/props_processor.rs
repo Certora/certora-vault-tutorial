@@ -36,6 +36,7 @@ impl CvlrProp for NoDilutionProp {
     fn new(
         vault_info_account: &AccountInfo,
         _vault_assets_account: &AccountInfo,
+        _vault_fee_account: Option<&AccountInfo>,
         _assets_mint: Option<&AccountInfo>,
         _shares_mint: Option<&AccountInfo>,
         _user_assets_account: Option<&AccountInfo>,
