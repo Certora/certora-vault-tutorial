@@ -1,7 +1,7 @@
 use bytemuck::{Pod, Zeroable};
 use solana_program::pubkey::{Pubkey, PubkeyError};
 
-use crate::utils::math::FeeBps;
+use crate::utils::math::{mul_div_ceil, FeeBps};
 use crate::utils::{
     guards::{require_gt, require_ne},
     math::mul_div_floor,
@@ -75,12 +75,30 @@ impl Vault {
         };
         Ok(assets)
     }
+    pub fn convert_shares_to_assets_ceil(&self, shares: u64) -> VaultResult<u64> {
+        let assets = if self.num_shares() == self.num_assets() {
+            shares
+        } else {
+            mul_div_ceil(shares, self.num_assets(), self.num_shares())?
+        };
+        Ok(assets)
+    }
 
     pub fn convert_assets_to_shares(&self, token: u64) -> VaultResult<u64> {
         let shares = if self.num_shares() == self.num_assets() {
             token
         } else {
             mul_div_floor(token, self.num_shares(), self.num_assets())?
+        };
+
+        Ok(shares)
+    }
+
+    pub fn convert_assets_to_shares_ceil(&self, token: u64) -> VaultResult<u64> {
+        let shares = if self.num_shares() == self.num_assets() {
+            token
+        } else {
+            mul_div_ceil(token, self.num_shares(), self.num_assets())?
         };
 
         Ok(shares)
