@@ -103,7 +103,6 @@ Notation:
  
 - fee deducted from a given operation: $\text{fee}$
 
-
 ### Simple properties 
 
 - Assets should not decrease:
@@ -125,12 +124,26 @@ Notation:
 \text{assets}_{\text{pre}} \leq \text{assets}_{\text{post}} \implies \text{shares}_{\text{pre}}  \leq \text{shares}_{\text{post}}
 ```
 
+To run all rules:
+
+```
+cd programs/vault/src/certora/confs
+certoraSolanaProver integrity.conf
+```
+
 ### Vault consistency
 
 The vault must remain consistent with the underlying SPL accounts:
 
 ```math
 \text{assets} \leq \text{token}_{\text{amount}} \wedge \text{shares} = \text{mint}_{\text{supply}}
+```
+
+To run all rules:
+
+```
+cd programs/vault/src/certora/confs
+certoraSolanaProver vault_consistency.conf
 ```
 
 ### No dilution 
@@ -146,6 +159,13 @@ operations), the vault must ensure:
 This guarantees that the asset-to-share ratio does not decrease after
 any operation.
 
+To run all rules:
+
+```
+cd programs/vault/src/certora/confs
+certoraSolanaProver no_dilution_processor.conf
+```
+
 ### Solvency
 
 The vault needs to ensure the following invariant to remain solvent:
@@ -155,6 +175,12 @@ The vault needs to ensure the following invariant to remain solvent:
 \text{shares} \leq \text{assets}
 ```
 
+To run all rules:
+
+```
+cd programs/vault/src/certora/confs
+certoraSolanaProver solvency_processor.conf
+```
 
 ### Fees
 
@@ -173,6 +199,13 @@ deducted for any successful execution:
 \text{fee}_{\text{bps}} = 0 \implies \forall~ vault, amount.~\text{deposit\_assets}(vault, amount) = \text{deposit\_assets\_with\_fees}(vault, amount)
 ```
 
+To run all rules:
+
+```
+cd programs/vault/src/certora/confs
+certoraSolanaProver fees.conf
+```
+
 ### Inflation attack
 
 An [inflation attack](https://blog.openzeppelin.com/a-novel-defense-against-erc4626-inflation-attacks) is an attack on a tokenized vault in which an attacker inflates the share price, causing a victim to lose assets to the vault due to rounding. The attacker is then extract the profit by redeeming its shares in the vault.
@@ -181,7 +214,12 @@ We show how to use Certora Prover to explore both the attack and different mitig
 
 We then propose a mitigation that limits rounding to 1 atom, but only extracting the exact amount of the assets from the user that is needed to cover the shares. We show that with this "exact" deposit, the loss (and therefore the win to the attacker) is limited to 1 atom.
 
+To run all rules:
 
+```
+cd programs/vault/src/certora/confs
+certoraSolanaProver inflation.conf
+```
 
 ## DISCLAIMER
 The code and examples provided in this repository are for educational purposes only. They are not production-ready and may contain bugs or security vulnerabilities. Use at your own risk.
