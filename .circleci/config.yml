@@ -1,0 +1,151 @@
+# Java Maven CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-java/ for more details
+
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@4.0.0
+
+parameters:
+  run_workflow_nightly:
+    default: false
+    type: boolean
+  
+  certora_cli_package:
+    default: "certora-cli-alpha-master"
+    type: string
+
+  path_to_confs:
+    default: "programs/vault/src/certora/ci"
+    type: string
+  
+  prover_version:
+    default: "master"
+    type: string
+
+  certora_solana_tools:
+    default: "v1.41"
+    type: string
+
+  rule_sanity:
+    default: "basic"
+    type: string
+
+commands:
+
+  install_conf_runner_infra:
+    steps:
+      - run:
+          name: Install ConfRunnerInfra
+          command: pip3.11 install git+ssh://git@github.com/Certora/ConfRunnerInfra.git
+
+  install_certora_cli:
+    steps:
+      - run:
+          name: Get the current master of EVMVerifier with << pipeline.parameters.certora_cli_package >>
+          command: pip3.11 install << pipeline.parameters.certora_cli_package >>
+
+  configure_aws:
+    steps:
+      - aws-cli/setup:
+          role_arn: $CIRCLECI_OIDC_CDK_STAGING
+          region: $AWS_REGION
+          session_duration: '8100'
+
+  install_cargo_certora_sbf:
+    steps:
+      - run:
+          name: Install cargo-certora-sbf
+          command: |
+            rustup toolchain install 1.86
+            cargo +1.86 install cargo-certora-sbf
+            cargo certora-sbf --no-build --no-rustup --tools-version << pipeline.parameters.certora_solana_tools >> --platform-tools-root $HOME/certora-pft -vv
+
+  compile:
+    steps:
+      - run:
+          name: Compile Rust To SBF
+          command: |
+            cd $HOME/repo/programs/vault
+            export CERTORA_CARGO=$HOME/certora-pft/<< pipeline.parameters.certora_solana_tools >>/platform-tools-certora/rust/bin/cargo
+            $CERTORA_CARGO update -p cvlr
+            $CERTORA_CARGO update -p cvlr-solana
+            cargo certora-sbf --no-tools-install --no-rustup --tools-version << pipeline.parameters.certora_solana_tools >> --platform-tools-root $HOME/certora-pft
+
+
+  regression:
+    steps:
+    - run:
+        name: Run Regression Tests
+        command: |
+          env SLACK_CHANNEL="solana-nightly-reports" \
+          Regression --path << pipeline.parameters.path_to_confs >> \
+                    --conf_ignore << pipeline.parameters.path_to_confs >>/test_ignore.txt \
+                    --prover_run_cmd certoraSolanaProver \
+                    --prover_version << pipeline.parameters.prover_version >> \
+                    --json_flags "{\"rule_sanity\": \"<< pipeline.parameters.rule_sanity >>\", \"use_per_rule_cache\": false, \"unused_summary_hard_fail\": \"on\", \"assert_autofinder_success\": true, \"group_id\": \"$CIRCLE_WORKFLOW_ID\"}" \
+                    --checks Verification \
+                    --send_message
+
+
+jobs:
+  solana_nightly:
+    parameters:
+      certora_ci_name:
+        type: string
+    docker:
+      - image: &img public.ecr.aws/certora/cvt-image:2024.10.16-4480-c8870b3
+    resource_class: small
+    environment:
+      CERTORA_DISABLE_AUTO_CACHE: "1"
+      CERTORA_CI_CLIENT: << parameters.certora_ci_name >>
+    working_directory: ~/repo
+    steps:
+      
+      - checkout
+
+      - install_certora_cli
+
+      - configure_aws
+
+      - install_conf_runner_infra
+
+      - install_cargo_certora_sbf
+
+      - compile
+
+      - regression
+
+      - store_artifacts:
+          path: Report.csv
+          destination: reports
+      
+      - store_test_results:
+          path: ~/repo
+
+
+
+workflows:
+  version: 2
+  # Nightly builds will run every day at 4am GMT
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 4 * * *"
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - solana_nightly:
+          certora_ci_name: Certora Tokenized Vault Nightly
+          context: aws_staging
+
+  # run from CircleCI with the boolean parameter run_workflow_nightly set to true
+  manual:
+    when: << pipeline.parameters.run_workflow_nightly >>
+    jobs:
+      - solana_nightly:
+          certora_ci_name: Certora Tokenized Vault Manual
+          context: aws_staging
