@@ -33,5 +33,6 @@ jobs:
           ecosystem: solana
           working-directory: programs/vault/src/certora/confs
           certora-key: ${{ secrets.CERTORAKEY }}
+          certora-sbf-options: "-vvv"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
