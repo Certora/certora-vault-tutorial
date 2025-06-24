@@ -34,6 +34,5 @@ jobs:
           working-directory: programs/vault/src/certora/confs
           certora-key: ${{ secrets.CERTORAKEY }}
           certora-sbf-options: "-vvv"
-          rust-version: "1.86.0"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
