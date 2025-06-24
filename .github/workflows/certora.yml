@@ -26,7 +26,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: "1.86"
-      - run: cargo +1.86 install cargo-certora-sbf
+      - name: Install Certora SBF
+        run: cargo +1.86 install cargo-certora-sbf
       - run: cargo certora-sbf --no-build
       - name: Submit verification jobs to Certora Prover
         uses: Certora/certora-run-action@v1
