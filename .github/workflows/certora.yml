@@ -22,7 +22,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: "1.86.0"
-          components: 1.75, 1.79
+      - run: rustup toolchain install 1.75 1.79
       - run: cargo install cargo-certora-sbf
       - run: cargo certora-sbf --no-build
       - name: Submit verification jobs to Certora Prover
