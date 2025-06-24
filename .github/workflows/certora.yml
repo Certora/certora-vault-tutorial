@@ -20,7 +20,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Submit verification jobs to Certora Prover
-        uses: Certora/certora-run-action@fix/solana-rust-setup
+        uses: Certora/certora-run-action@v1
         with:
           configurations: |-
             integrity.conf
