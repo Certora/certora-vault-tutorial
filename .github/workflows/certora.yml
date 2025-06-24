@@ -1,0 +1,38 @@
+name: Certora Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  certora_run_submission:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Submit verification jobs to Certora Prover
+        uses: Certora/certora-run-action@v1
+        with:
+          configurations: |-
+            integrity.conf
+            vault_consistency.conf
+            no_dilution_processor.conf
+            solvency_processor.conf
+            fees.conf
+            inflation.conf
+          job-name: "Test Action"
+          ecosystem: solana
+          working-directory: programs/vault/src/certora/confs
+          certora-key: ${{ secrets.CERTORAKEY }}
+          certora-sbf-options: "-vvv"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
