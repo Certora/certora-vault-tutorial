@@ -58,8 +58,8 @@ commands:
       - run:
           name: Install cargo-certora-sbf
           command: |
-            rustup toolchain install 1.86
-            cargo +1.86 install cargo-certora-sbf
+            rustup toolchain install 1.88
+            cargo +1.88 install cargo-certora-sbf
             cargo certora-sbf --no-build --no-rustup --tools-version << pipeline.parameters.certora_solana_tools >> --platform-tools-root $HOME/certora-pft -vv
 
   compile:
