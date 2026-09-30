@@ -7,8 +7,6 @@ pub mod processor;
 pub mod state;
 pub mod utils;
 
-pub mod certora;
-
 pub use errors::{VaultError, VaultResult};
 use solana_program::declare_id;
 
