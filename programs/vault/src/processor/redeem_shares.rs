@@ -39,12 +39,14 @@ pub fn process_redeem_shares(accounts: &[AccountInfo], amount: u64) -> ProgramRe
         spl_token_program.as_ref(),
     )?;
 
+    let vault_assets_bump = vault_info.get()?.vault_assets_account_bump;
     spl_transfer_assets_from_vault(
         effect.assets_to_user,
         &vault_assets_account,
         &user_assets_account,
         &assets_mint,
         spl_token_program.as_ref(),
+        crate::vault_assets_account_seeds_with_bump!(vault_info.as_ref().key, vault_assets_bump),
     )?;
 
     Ok(())

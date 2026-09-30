@@ -41,11 +41,13 @@ pub fn process_deposit_exact(accounts: &[AccountInfo], amount: u64) -> ProgramRe
         spl_token_program.as_ref(),
     )?;
 
+    let shares_mint_bump = vault_info.get()?.vault_shares_mint_bump;
     spl_mint_shares(
         effect.shares_to_user,
         &user_shares_account,
         shares_mint.as_ref(),
         spl_token_program.as_ref(),
+        crate::vault_shares_mint_seeds_with_bump!(vault_info.as_ref().key, shares_mint_bump),
     )?;
 
     Ok(())
