@@ -1,0 +1,87 @@
+[
+  {
+    "sort": "invariant",
+    "description": "If vault.shares <= vault.assets holds before process_redeem_shares, it must still hold after a successful call, so the vault can never end a redemption owing more shares than it records assets to back them.",
+    "title": "redeem_preserves_solvency"
+  },
+  {
+    "sort": "safety_property",
+    "description": "On a successful process_redeem_shares(amount), vault.assets decreases by exactly `amount` when the pre-state shares equal the pre-state assets, and otherwise by exactly floor(amount * assets_before / shares_before) computed from the pre-redemption totals; any other payout over- or under-pays the redeemer at the expense of the remaining share holders.",
+    "title": "redeem_payout_equals_floor_of_pre_ratio"
+  },
+  {
+    "sort": "safety_property",
+    "description": "On a successful process_redeem_shares(amount), vault.shares decreases by exactly `amount`, the amount passed to the SPL Token burn CPI equals `amount`, and the amount passed to the SPL Token transfer CPI equals the decrease in vault.assets; a mismatch makes the recorded vault accounting diverge from the tokens actually moved.",
+    "title": "redeem_burns_exactly_requested_shares_and_cpi_amounts_match"
+  },
+  {
+    "sort": "safety_property",
+    "description": "A successful process_redeem_shares must satisfy assets_after * shares_before >= assets_before * shares_after, i.e. the per-share asset backing never decreases across a redemption, so rounding in the share-to-asset conversion always favors the vault rather than the redeemer.",
+    "title": "redeem_does_not_dilute_remaining_holders"
+  },
+  {
+    "sort": "safety_property",
+    "description": "process_redeem_shares must reject (rather than wrap or truncate) any request where `amount` exceeds the vault's recorded shares or where the computed payout exceeds the vault's recorded assets, so neither vault.shares nor vault.assets can underflow into a huge value that would let the vault be drained by a subsequent redemption.",
+    "title": "redeem_rejects_over_redemption_without_wrapping"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "A successful process_redeem_shares implies the `authority` account is a signer; if the signer check were dropped, anyone could burn another user's shares and route the asset payout to their own token account.",
+    "title": "redeem_requires_authority_signature"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "A successful process_redeem_shares implies vault_info.owner equals the certora_vault program id; VaultInfo deserializes the account with bytemuck without any owner or discriminant check, so a look-alike account created under another program would let an attacker dictate shares, assets, the recorded vault_assets_account and the PDA bumps used to sign the asset transfer.",
+    "title": "redeem_requires_vault_info_owned_by_program"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "A successful process_redeem_shares implies vault_assets_account.key equals the address derived from seeds [VAULT_ASSETS, vault_info.key, vault.vault_assets_account_bump] under the program id \u2014 the very seeds the handler uses in invoke_signed; RedeemSharesContext::validate only compares the key to the unverified vault.vault_assets_account field and never calls check_vault (unlike DepositContext and SlashContext), so the program can be made to sign a transfer out of an account that is not its canonical assets PDA.",
+    "title": "redeem_vault_assets_account_must_be_canonical_pda"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "A successful process_redeem_shares implies shares_mint.key equals both vault.shares_mint and the address derived from seeds [SHARES_MINT, vault_info.key, vault.vault_shares_mint_bump]; the redeem context never re-derives the shares mint PDA, so a spoofed or mis-recorded mint would make the burn CPI destroy tokens of a mint unrelated to the vault's shares while still crediting the redeemer with vault assets.",
+    "title": "redeem_shares_mint_must_be_canonical_pda"
+  },
+  {
+    "sort": "safety_property",
+    "description": "process_redeem_shares must fail when vault_assets_account.key equals user_assets_account.key; otherwise shares are burned and vault.assets is decremented while no tokens actually leave the vault token account, and a subsequent permissionless update_reward re-credits those assets, inflating the share price for the attacker's remaining shares.",
+    "title": "redeem_rejects_vault_to_self_transfer"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "Both cross-program invocations issued by process_redeem_shares (the shares burn and the asset transfer) must target the canonical SPL Token program id; if the program id were taken from an unvalidated account, an attacker could point it at malicious code while the vault's PDA signs the transfer instruction.",
+    "title": "redeem_cpis_only_to_canonical_spl_token_program"
+  },
+  {
+    "sort": "safety_property",
+    "description": "A successful process_redeem_shares must leave vault.admin, vault.slash_admin, vault.shares_mint, vault.assets_mint, vault.vault_assets_account, vault.vault_shares_mint_bump, vault.vault_assets_account_bump, vault.fee_bps and vault.fee_amount byte-identical to their pre-call values; a redemption that mutates any of these could hijack the vault's admin or fee accounting.",
+    "title": "redeem_leaves_vault_config_unchanged"
+  },
+  {
+    "sort": "safety_property",
+    "description": "For a solvent vault (shares <= assets), a signing authority, correctly derived accounts and 0 < amount <= vault.shares, process_redeem_shares must succeed \u2014 the post-decrement solvency re-check inside del_token must never make an otherwise legitimate redemption impossible, which would strand user funds.",
+    "title": "redeem_reachable_for_legitimate_user"
+  },
+  {
+    "sort": "safety_property",
+    "description": "Spanning a sequence of two instructions: if a user deposits X assets and receives S shares, an immediately following process_redeem_shares(S) by that user must pay out at most X assets, so no round trip through the vault extracts value from existing share holders.",
+    "title": "deposit_then_redeem_round_trip_no_profit"
+  },
+  {
+    "sort": "safety_property",
+    "description": "After a successful process_redeem_shares, if vault.shares is 0 then vault.assets must also be 0 \u2014 a redemption must never leave the vault with zero outstanding shares but a non-zero recorded asset balance, because such a vault is permanently bricked (further deposits abort since convert_assets_to_shares yields 0 and mint_shares requires a positive amount, and further redemptions abort on division by zero shares), stranding the residual assets forever.",
+    "title": "redeem_never_leaves_shareless_vault_with_assets"
+  },
+  {
+    "sort": "safety_property",
+    "description": "process_redeem_shares must reject any call in which the vault state records the same pubkey for vault.assets_mint and vault.shares_mint (equivalently, the assets_mint and shares_mint accounts it is given must be distinct), since if the share mint \u2014 which is its own mint authority PDA \u2014 were also the asset mint the vault could mint the asset token at will, and the burn CPI would destroy asset tokens while the payout transfer moves the same token, collapsing the shares/assets distinction entirely.",
+    "title": "redeem_requires_distinct_asset_and_share_mints"
+  },
+  {
+    "sort": "safety_property",
+    "description": "On a successful process_redeem_shares, the SPL Token transfer CPI must debit the vault_assets_account and credit exactly the user_assets_account passed in the instruction (never the reverse direction, and never any other account of the instruction), and the burn CPI must debit exactly the user_shares_account passed in, for mint shares_mint, with authority as the token authority; if the direction or an account position were wrong, the redeemer would lose shares while assets moved into the vault (or to a third party) even though vault.assets, vault.shares and the CPI amounts all look correct.",
+    "title": "redeem_cpi_moves_assets_from_vault_to_named_user_account"
+  }
+]

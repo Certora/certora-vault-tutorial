@@ -1,0 +1,312 @@
+{
+  "user_id": "_anonymous",
+  "run_id": "2e74f8f8fabb412eaaa574089c64575f",
+  "run_mode": "comprehensive",
+  "token_usage": {
+    "totals": {
+      "input": 2283,
+      "output": 1711807,
+      "cache_read": 75474360,
+      "cache_write": 4177915
+    },
+    "by_model": {
+      "claude-opus-5": {
+        "input": 2016,
+        "output": 1529427,
+        "cache_read": 73293900,
+        "cache_write": 3137472
+      },
+      "claude-sonnet-5": {
+        "input": 267,
+        "output": 182380,
+        "cache_read": 2180460,
+        "cache_write": 1040443
+      }
+    },
+    "by_phase": [
+      {
+        "task_id": "formalize-2",
+        "phase": "FORMALIZATION",
+        "input": 270,
+        "output": 219896,
+        "cache_read": 7493896,
+        "cache_write": 619123
+      },
+      {
+        "task_id": "formalize-4",
+        "phase": "FORMALIZATION",
+        "input": 134,
+        "output": 128886,
+        "cache_read": 3979948,
+        "cache_write": 444153
+      },
+      {
+        "task_id": "formalize-3",
+        "phase": "FORMALIZATION",
+        "input": 308,
+        "output": 367516,
+        "cache_read": 12993300,
+        "cache_write": 860515
+      },
+      {
+        "task_id": "formalize-1",
+        "phase": "FORMALIZATION",
+        "input": 331,
+        "output": 324879,
+        "cache_read": 19062966,
+        "cache_write": 719661
+      },
+      {
+        "task_id": "formalize-0",
+        "phase": "FORMALIZATION",
+        "input": 354,
+        "output": 407464,
+        "cache_read": 25272244,
+        "cache_write": 892159
+      },
+      {
+        "task_id": "formalize-5",
+        "phase": "FORMALIZATION",
+        "input": 166,
+        "output": 151474,
+        "cache_read": 6672006,
+        "cache_write": 395209
+      },
+      {
+        "task_id": "report",
+        "phase": "REPORT",
+        "input": 720,
+        "output": 111692,
+        "cache_read": 0,
+        "cache_write": 247095
+      }
+    ],
+    "by_origin": [
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-45ed2d4d586ee55b-6cc658ce645b9a09",
+        "node": "tool_result",
+        "task_id": "formalize-0",
+        "calls": 120,
+        "input": 240,
+        "output": 241558,
+        "cache_read": 14129507,
+        "cache_write": 509133
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-00c65cb9388374a5-3a1d97ff2486ec8f",
+        "node": "tool_result",
+        "task_id": "formalize-1",
+        "calls": 117,
+        "input": 234,
+        "output": 193510,
+        "cache_read": 11153301,
+        "cache_write": 483297
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-45ed2d4d586ee55b-6cc658ce645b9a09",
+        "node": "tools",
+        "task_id": "formalize-0",
+        "calls": 48,
+        "input": 96,
+        "output": 154750,
+        "cache_read": 11054297,
+        "cache_write": 99865
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-226dd220e5eb8c70-1a0230c0614126b4",
+        "node": "tool_result",
+        "task_id": "formalize-3",
+        "calls": 112,
+        "input": 224,
+        "output": 260838,
+        "cache_read": 9273359,
+        "cache_write": 487322
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-00c65cb9388374a5-3a1d97ff2486ec8f",
+        "node": "tools",
+        "task_id": "formalize-1",
+        "calls": 39,
+        "input": 78,
+        "output": 126770,
+        "cache_read": 7863993,
+        "cache_write": 34012
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-98d3775614215252-d16635aa4ec5c3d7",
+        "node": "tool_result",
+        "task_id": "formalize-2",
+        "calls": 115,
+        "input": 230,
+        "output": 186674,
+        "cache_read": 6095533,
+        "cache_write": 358748
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-958d659842f3821c-b662228db1a7df67",
+        "node": "tool_result",
+        "task_id": "formalize-5",
+        "calls": 71,
+        "input": 142,
+        "output": 130702,
+        "cache_read": 5575468,
+        "cache_write": 283916
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-226dd220e5eb8c70-1a0230c0614126b4",
+        "node": "tools",
+        "task_id": "formalize-3",
+        "calls": 32,
+        "input": 64,
+        "output": 93269,
+        "cache_read": 3614512,
+        "cache_write": 109627
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-59000fbd07d66a92-f2b704b7bf877ae5",
+        "node": "tool_result",
+        "task_id": "formalize-4",
+        "calls": 51,
+        "input": 102,
+        "output": 95528,
+        "cache_read": 2784908,
+        "cache_write": 217080
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-98d3775614215252-d16635aa4ec5c3d7",
+        "node": "tools",
+        "task_id": "formalize-2",
+        "calls": 9,
+        "input": 18,
+        "output": 27389,
+        "cache_read": 1326376,
+        "cache_write": 8974
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-59000fbd07d66a92-f2b704b7bf877ae5",
+        "node": "tools",
+        "task_id": "formalize-4",
+        "calls": 10,
+        "input": 20,
+        "output": 27434,
+        "cache_read": 1195040,
+        "cache_write": 11152
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-958d659842f3821c-b662228db1a7df67",
+        "node": "tools",
+        "task_id": "formalize-5",
+        "calls": 8,
+        "input": 16,
+        "output": 20390,
+        "cache_read": 1081531,
+        "cache_write": 7842
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-45ed2d4d586ee55b-6cc658ce645b9a09",
+        "node": "initial",
+        "task_id": "formalize-0",
+        "calls": 13,
+        "input": 18,
+        "output": 11156,
+        "cache_read": 88440,
+        "cache_write": 283161
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-226dd220e5eb8c70-1a0230c0614126b4",
+        "node": "initial",
+        "task_id": "formalize-3",
+        "calls": 15,
+        "input": 20,
+        "output": 13409,
+        "cache_read": 105429,
+        "cache_write": 263566
+      },
+      {
+        "thread_id": null,
+        "node": null,
+        "task_id": "report",
+        "calls": 36,
+        "input": 720,
+        "output": 111692,
+        "cache_read": 0,
+        "cache_write": 247095
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-98d3775614215252-d16635aa4ec5c3d7",
+        "node": "initial",
+        "task_id": "formalize-2",
+        "calls": 15,
+        "input": 22,
+        "output": 5833,
+        "cache_read": 71987,
+        "cache_write": 251401
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-00c65cb9388374a5-3a1d97ff2486ec8f",
+        "node": "initial",
+        "task_id": "formalize-1",
+        "calls": 12,
+        "input": 19,
+        "output": 4599,
+        "cache_read": 45672,
+        "cache_write": 202352
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-59000fbd07d66a92-f2b704b7bf877ae5",
+        "node": "initial",
+        "task_id": "formalize-4",
+        "calls": 10,
+        "input": 12,
+        "output": 5924,
+        "cache_read": 0,
+        "cache_write": 215921
+      },
+      {
+        "thread_id": "cvlr_f09e45eb11be-solana-properties-958d659842f3821c-b662228db1a7df67",
+        "node": "initial",
+        "task_id": "formalize-5",
+        "calls": 4,
+        "input": 8,
+        "output": 382,
+        "cache_read": 15007,
+        "cache_write": 103451
+      }
+    ]
+  },
+  "prover_usage": {
+    "total_ms": 24688663,
+    "by_phase": [
+      {
+        "task_id": "formalize-2",
+        "phase": "FORMALIZATION",
+        "ms": 3530051
+      },
+      {
+        "task_id": "formalize-4",
+        "phase": "FORMALIZATION",
+        "ms": 217894
+      },
+      {
+        "task_id": "formalize-3",
+        "phase": "FORMALIZATION",
+        "ms": 4656679
+      },
+      {
+        "task_id": "formalize-1",
+        "phase": "FORMALIZATION",
+        "ms": 6863403
+      },
+      {
+        "task_id": "formalize-0",
+        "phase": "FORMALIZATION",
+        "ms": 6873033
+      },
+      {
+        "task_id": "formalize-5",
+        "phase": "FORMALIZATION",
+        "ms": 2547603
+      }
+    ]
+  }
+}

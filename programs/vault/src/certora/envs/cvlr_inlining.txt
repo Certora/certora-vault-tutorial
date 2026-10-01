@@ -1,0 +1,236 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Generated — this is the file the build reports to the prover.
+;;; Rewritten on every run. Composed, in order, from AutoProver's
+;;; starting configuration:
+;;;   cvlr_inlining_core.txt
+;;;   cvlr_inlining_anchor.txt
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Platform paths rewritten for this target's generation (12 aliases) — see composer/spec/cvlr/env_paths.py
+; By default we do not inline core, std, alloc, and solana_program
+; with some exceptions below with #[inline]
+
+#[inline(never)] ^core::.*$
+#[inline(never)] ^std::.*$
+#[inline(never)] ^<?alloc::.*$
+#[inline(never)] ^solana_[a-z0-9_]*::.*$
+
+; CVT functions
+#[inline(never)] ^([^:]+::)*CVT_.*$
+
+; Rust memory allocation functions 
+#[inline(never)] ^__rust_alloc$
+#[inline(never)] ^__rust_dealloc$
+#[inline(never)] ^__rust_alloc_zeroed$
+#[inline(never)] ^__rg_alloc$
+#[inline(never)] ^__rg_dealloc$
+#[inline(never)] ^__rg_oom$
+
+;; We want to inline wrappers that call the global allocator
+#[inline] ^alloc::alloc::exchange_malloc$
+;;;#[inline] ^alloc::fmt::format::format_inner$
+
+; memcpy/memmove/memset/memcmp
+; These functions are wrappers to sol_memcpy_, sol_memmove_,
+; sol_memset_, and sol_memcmp_.  These wrappers ensure that sol_*
+; preconditions are satisfied when these functions are called
+; (alignment conditions, non-nullity, etc). Since, we are not interested in
+; verifying the code of the wrappers, we don't inline calls to
+; memcpy, memmove, memset, and memcmp so that we can replace them
+; directly with sol_memcpy_, sol_memmove_, sol_memset_, and
+; sol_memcmp_, respectively.
+#[inline(never)] ^memcpy$
+#[inline(never)] ^memmove$
+#[inline(never)] ^memset$
+#[inline(never)] ^memcmp$
+
+
+; Compiler-RT: integer arithmetic routines used on platforms that don't provide HW support
+; All the functions are described here
+; https://github.com/llvm/llvm-project/blob/main/compiler-rt/lib/builtins/README.txt
+; 
+; Starting with sbfv2, the code of compiler-rt library is not included in the final ELF file
+; but in ebpf and sbf did so we make sure that we don't inline those functions.
+;
+; Integral bit manipulation
+#[inline(never)] ^__ashldi3$
+#[inline(never)] ^__ashlti3$
+#[inline(never)] ^__ashrdi3$
+#[inline(never)] ^__ashrti3$
+#[inline(never)] ^__lshrdi3$
+#[inline(never)] ^__lshrti3$
+#[inline(never)] ^__clzsi2$
+#[inline(never)] ^__clzdi2$
+#[inline(never)] ^__clzti2$
+#[inline(never)] ^__ctzsi2$
+#[inline(never)] ^__ctzdi2$
+#[inline(never)] ^__ctzti2$
+#[inline(never)] ^__ffssi2$
+#[inline(never)] ^__ffsdi2$
+#[inline(never)] ^__ffsti2$
+#[inline(never)] ^__paritysi2$
+#[inline(never)] ^__paritydi2$
+#[inline(never)] ^__parityti2$
+#[inline(never)] ^__popcountsi2$
+#[inline(never)] ^__popcountdi2$
+#[inline(never)] ^__popcountti2$
+#[inline(never)] ^__bswapsi2$
+#[inline(never)] ^__bswapdi2$
+; integral arithmetic 
+#[inline(never)] ^__negdi2$
+#[inline(never)] ^__negti2$
+#[inline(never)] ^__muldi3$
+#[inline(never)] ^__multi3$
+#[inline(never)] ^__divsi3$
+#[inline(never)] ^__divdi3$
+#[inline(never)] ^__divti3$
+#[inline(never)] ^__udivsi3$
+#[inline(never)] ^__udivdi3$
+#[inline(never)] ^__udivti3$
+#[inline(never)] ^__modsi3$
+#[inline(never)] ^__moddi3$
+#[inline(never)] ^__modti3$
+#[inline(never)] ^__umodsi3$
+#[inline(never)] ^__umoddi3$
+#[inline(never)] ^__umodti3$
+#[inline(never)] ^__udivmoddi4$
+#[inline(never)] ^__udivmodti4$
+#[inline(never)] ^__udivmodsi4$
+#[inline(never)] ^__divmodsi4$
+#[inline(never)] ^__divmoddi4$
+#[inline(never)] ^__divmodti4$
+; floating point arithmetic
+#[inline(never)] ^(compiler_builtins::float::add::)?__adddf3$
+#[inline(never)] ^__muldf3$
+#[inline(never)] ^(compiler_builtins::float::div::)?__divdf3$
+#[inline(never)] ^(compiler_builtins::math::libm::exp::)?exp$
+#[inline(never)] ^__floatundidf$
+#[inline(never)] ^__powidf2$
+#[inline(never)] ^__unorddf2$
+#[inline(never)] ^__truncdfsf2$
+#[inline(never)] ^__ltdf2$
+#[inline(never)] ^__gtdf2$
+#[inline(never)] ^__fixdfdi$
+#[inline(never)] ^__gedf2$
+#[inline(never)] ^__floatsidf$
+#[inline(never)] ^__subdf3$
+#[inline(never)] ^__floattidf$
+
+#[inline(never)] ^.*::fmt$
+
+;; This is a wrapper so we inline it
+#[inline] ^([^:]+::)*CVT_uninterpreted_usize$
+
+#[inline] ^solana_account_info::AccountInfo::new$
+#[inline] ^solana_account_info::AccountInfo::lamports$
+#[inline] ^solana_account_info::AccountInfo::try_borrow_mut_lamports$
+#[inline] ^solana_account_info::AccountInfo::try_borrow_lamports$
+#[inline] ^solana_account_info::AccountInfo::data_len$
+#[inline] ^solana_account_info::AccountInfo::try_data_len$
+#[inline] ^solana_account_info::AccountInfo::try_borrow_data$
+#[inline] ^solana_account_info::AccountInfo::try_borrow_mut_data$
+#[inline] ^solana_account_info::AccountInfo::data_is_empty$
+#[inline] ^solana_program::program::invoke_signed$
+#[inline] ^solana_program::program::invoke$
+#[inline] ^solana_program_pack::Pack::unpack$
+#[inline] ^solana_hash::Hash::new_from_array$
+#[inline] ^solana_sysvar::clock::<impl solana_sysvar::Sysvar for solana_clock::Clock>::get$
+#[inline] ^solana_program::poseidon::PoseidonHash::new$
+#[inline] ^solana_account_info::AccountInfo::assign$
+;; A resize writes the account's length twice, into the serialized data and into the borrowed
+;; slice. A call the Prover does not analyze drops both writes, so the length would read as the
+;; old one afterwards. `resize` is not inlined: it zero-fills, and the Prover's memory partitioning
+;; fails on that `sol_memset_` with an internal error that ends the whole job (CERT-10184).
+#[inline] ^solana_account_info::AccountInfo::realloc$
+#[inline] ^solana_account_info::AccountInfo::original_data_len$
+#[inline] ^solana_sdk_ids::incinerator::check_id$
+#[inline] ^solana_sdk_ids::system_program::check_id$
+#[inline] ^solana_sdk_ids::system_program::id$
+#[inline] ^solana_rent::Rent::minimum_balance$
+#[inline] ^solana_sysvar::rent::<impl solana_sysvar::Sysvar for solana_rent::Rent>::get$
+#[inline] ^solana_program::instruction::get_stack_height$
+#[inline] ^solana_program::program::set_return_data$
+
+#[inline] ^<solana_program_error::ProgramError as core::convert::From<u64>>::from$
+
+#[inline] ^core::cell::RefCell<T>::borrow(_\d+)?$
+#[inline] ^core::cell::RefCell<T>::borrow_mut(_\d+)?$
+
+
+;; Borsh and common functions used by Borsh
+#[inline(never)] ^std::io::error::Error::new(_\d+)?$
+#[inline(never)] ^borsh::de::unexpected_eof_to_unexpected_length_of_input(_\d+)?$
+
+
+;; We need to inline this function to avoid unsoundness results in
+;; NcnOperatorTicket::seeds and others.
+#[inline] ^<alloc::vec::Vec<T> as alloc::vec::spec_from_iter::SpecFromIter<T,I>>::from_iter(_\d+)?$
+
+#[inline] ^<alloc::boxed::Box<T,A> as core::clone::Clone>::clone$
+;; By default we don't inline anything from anchor.
+#[inline(never)] ^.*anchor_lang.*$
+
+;; except these functions
+
+#[inline] ^anchor_lang::accounts::account_loader::AccountLoader<T>::load(_[0-9][0-9]*)*$
+#[inline] ^anchor_lang::accounts::account_loader::AccountLoader<T>::load_mut(_[0-9][0-9]*)*$
+
+#[inline] ^<anchor_lang::accounts::account::Account<T> as core::clone::Clone>::clone(_[0-9][0-9]*)*$
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; try_from and try_from_unchecked might call to deserialize so we need to check case by case
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#[inline] ^anchor_lang::accounts::account_loader::AccountLoader<T>::try_from(_[0-9][0-9]*)*$
+#[inline] ^anchor_lang::accounts::account_loader::AccountLoader<T>::try_from_unchecked(_[0-9][0-9]*)*$
+#[inline] ^anchor_lang::accounts::account::Account<T>::try_from_unchecked(_[0-9][0-9]*)*$
+#[inline] ^anchor_lang::accounts::account::Account<T>::try_from(_[0-9][0-9]*)*$
+#[inline] ^anchor_lang::accounts::signer::Signer::try_from$
+#[inline] ^<anchor_lang::accounts::program::Program<T> as core::convert::TryFrom<&solana_account_info::AccountInfo>>::try_from$
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#[inline] ^<anchor_lang::accounts::unchecked_account::UncheckedAccount as core::convert::AsRef<solana_account_info::AccountInfo>>::as_ref$
+#[inline] ^<anchor_lang::accounts::unchecked_account::UncheckedAccount as anchor_lang::ToAccountInfos>::to_account_infos$
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; These are needed to include the code for key()
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#[inline] ^<anchor_lang::accounts::unchecked_account::UncheckedAccount as anchor_lang::Key>::key$
+#[inline] ^<solana_pubkey::Pubkey as anchor_lang::Key>::key$
+#[inline] ^.*::ZeroCopyAccessor<solana_pubkey::Pubkey>>::get$
+#[inline] ^anchor_lang::accounts::account_info::<impl anchor_lang::Key for solana_account_info::AccountInfo>::key$
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; These do conversion between error codes 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#[inline] ^<anchor_lang::error::Error as core::convert::From<anchor_lang::error::AnchorError>>::from$
+#[inline] ^<anchor_lang::error::Error as core::convert::From<anchor_lang::error::ErrorCode>>::from$
+#[inline] ^<anchor_lang::error::Error as core::convert::From<solana_program_error::ProgramError>>::from$
+#[inline] ^anchor_lang::error::<impl core::convert::From<anchor_lang::error::ErrorCode> for u32>::from$
+;; Any program's own error enum, not one named project's: this layer is canonical and is copied
+;; into every scaffold, so a concrete crate name here is a directive that matches nothing.
+#[inline] ^.+ for anchor_lang::error::Error>::from$
+#[inline] ^<anchor_lang::error::Error as core::convert::From<std::io::error::Error>>::from$
+
+#[inline] ^<.+ as anchor_lang::AccountDeserialize>::try_deserialize$
+#[inline] ^<.+ as anchor_lang::AccountDeserialize>::try_deserialize_unchecked$
+#[inline] ^anchor_lang::accounts::interface_account::InterfaceAccount<T>::try_from(_\d+)?$
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; The system-program CPI helper, as the Prover's own warning recommends. Left external, it never
+;;; returns Ok, so nothing after `system_program::transfer(..)?` is reachable and every assertion
+;;; there passes vacuously. Inlined, it reaches `invoke`.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#[inline] ^anchor_lang::system_program::transfer$
+#[inline] ^core::ptr::drop_in_place<core::result::Result<\(\),anchor_lang::error::Error>>$
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Account validation. A program's `#[derive(Accounts)]` struct names `anchor_lang::Accounts` in
+;;; its trait path, so the blanket above makes its generated `try_accounts` external, along with
+;;; the per-field `Signer`/`Account<T>`/`Program<T>` impls it delegates to. External, it returns an
+;;; arbitrary `Result` and binds arbitrary accounts, so no signer, `mut`, `seeds`, `has_one` or
+;;; `init` constraint is checked. `init` reaches the system-program helpers below, which left
+;;; external never return Ok, the same trap as `transfer`. Anchor generates the `init` block as an
+;;; `#[inline(never)]` closure inside `try_accounts`, and that closure binds the new account.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#[inline] ^<.+ as anchor_lang::Accounts<.+>>::try_accounts(::\{\{closure\}\})?$
+#[inline] ^anchor_lang::system_program::create_account$
+#[inline] ^anchor_lang::system_program::allocate$
+#[inline] ^anchor_lang::system_program::assign$

@@ -1,0 +1,97 @@
+[
+  {
+    "sort": "safety_property",
+    "description": "In `process_deposit_with_fee`, the fee transferred to `vault_fee_account` must equal exactly floor(amount * vault.fee_bps / 10000) and the amount transferred to `vault_assets_account` must equal exactly amount - fee, so the two CPI amounts sum to exactly the caller-supplied `amount`; otherwise the depositor is over-charged or the protocol under-collects its fee.",
+    "title": "fee_is_exact_floor_bps_and_split_sums_to_amount"
+  },
+  {
+    "sort": "safety_property",
+    "description": "Both `process_deposit_with_fee` and `process_deposit_with_fee_exact` must abort, leaving the Vault account byte-identical and performing no token transfer or mint, whenever the stored `vault.fee_bps` exceeds 10000, since a fee above 100% would otherwise produce a fee larger than the deposit and a nonsensical (underflowing) net amount.",
+    "title": "fee_bps_cap_enforced_before_any_effect"
+  },
+  {
+    "sort": "safety_property",
+    "description": "For both `process_deposit_with_fee` and `process_deposit_with_fee_exact`, the increase in `vault.assets` must equal exactly the amount argument of the SPL Token transfer into `vault_assets_account` (the net, post-fee figure) and must not include the fee portion; if the handler moves assets into the vault token account without crediting `vault.assets` (or credits more than it moves), the vault's recorded asset total permanently diverges from the assets backing it.",
+    "title": "vault_assets_increase_equals_net_transferred_in"
+  },
+  {
+    "sort": "safety_property",
+    "description": "For both `process_deposit_with_fee` and `process_deposit_with_fee_exact`, the increase in `vault.shares` must equal exactly the amount argument of the `mint_to` CPI that mints shares to `user_shares_account`; minting shares to a user without incrementing `vault.shares` makes the circulating share supply exceed the vault's accounting, corrupting the redemption ratio and making later redemptions underflow.",
+    "title": "vault_shares_increase_equals_shares_minted"
+  },
+  {
+    "sort": "invariant",
+    "description": "If `vault.shares <= vault.assets` holds before `process_deposit_with_fee` or `process_deposit_with_fee_exact` runs, it must still hold after the handler returns successfully; a violation means the vault owes more shares than it has assets to back and some redeemer cannot be paid.",
+    "title": "fee_deposit_preserves_solvency"
+  },
+  {
+    "sort": "safety_property",
+    "description": "For both fee-deposit handlers, the post-state must satisfy assets_after * shares_before >= assets_before * shares_after (evaluated over exact integers), i.e. the depositor must never receive shares worth more assets at the pre-deposit ratio than the net amount they contributed, otherwise a depositor extracts value from existing share holders.",
+    "title": "fee_deposit_does_not_dilute_existing_holders"
+  },
+  {
+    "sort": "safety_property",
+    "description": "Neither `process_deposit_with_fee` nor `process_deposit_with_fee_exact` may modify `vault.fee_amount`, because their fee is delivered to the separate `vault_fee_account` token account and is therefore not backed by any balance in `vault_assets_account`; incrementing the counter would let the Fee Collection instruction withdraw depositor-backing assets out of the vault's asset account.",
+    "title": "fee_deposit_leaves_fee_amount_counter_unchanged"
+  },
+  {
+    "sort": "safety_property",
+    "description": "Both fee-deposit handlers must leave `vault.admin`, `vault.slash_admin`, `vault.assets_mint`, `vault.shares_mint`, `vault.fee_token_account`, `vault.vault_assets_account`, `vault.fee_bps`, `vault.vault_shares_mint_bump` and `vault.vault_assets_account_bump` bit-identical, since a deposit that rewrites any configuration field of the zero-copy Vault struct would hand over admin control or redirect future transfers.",
+    "title": "fee_deposit_leaves_vault_configuration_fields_unchanged"
+  },
+  {
+    "sort": "safety_property",
+    "description": "Both fee-deposit handlers must fail whenever the passed `vault_assets_account` and `user_assets_account` are the same account, because an SPL self-transfer moves no tokens while the handler would still credit `vault.assets` and mint shares, letting a depositor mint shares backed by assets that never arrived.",
+    "title": "fee_deposit_rejects_vault_user_asset_account_aliasing"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "`VaultInfo::try_from` deserializes the Vault with bytemuck without checking that the account's owner is this program (and without any discriminator check), so both fee-deposit handlers must reject a `vault_info` account not owned by the vault program; otherwise an attacker supplies a fabricated Vault whose `vault_assets_account`, `fee_token_account`, `assets_mint`, `shares_mint` and bump fields they control, making every 'must equal vault.X' constraint in `DepositWithFeeContext::validate` vacuous \u2014 and the exact variant never writes the account, so the runtime's ownership check on data mutation does not catch it either.",
+    "title": "vault_info_owner_and_discriminator_unchecked"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "Unlike `DepositContext`, `DepositWithFeeContext` never re-derives the vault's PDAs, so both fee-deposit handlers must additionally verify that `vault_assets_account` equals the program address for seeds [VAULT_ASSETS, vault_info.key, vault.vault_assets_account_bump] and that `shares_mint` equals the program address for seeds [SHARES_MINT, vault_info.key, vault.vault_shares_mint_bump]; without this the `mint_to` CPI is signed with a bump read out of unverified vault state and a substituted asset account or mint can receive the deposit or issue the shares.",
+    "title": "fee_deposit_does_not_rederive_vault_pdas"
+  },
+  {
+    "sort": "safety_property",
+    "description": "Neither fee-deposit handler may debit the depositor (net transfer or fee transfer with a non-zero amount) unless the number of shares minted to `user_shares_account` is strictly positive, and it may not mint shares when no assets are transferred into the vault; the `exact` variant bypasses the `amt > 0` guards inside `Vault::mint_shares`/`Vault::add_token`, so a deposit that rounds to zero shares could still take the user's tokens.",
+    "title": "no_user_assets_debited_without_positive_shares"
+  },
+  {
+    "sort": "safety_property",
+    "description": "In `process_deposit_with_fee_exact`, the amount transferred into `vault_assets_account` must equal exactly the assets needed to back the shares minted at the pre-deposit ratio (convert_shares_to_assets(shares_minted)) and the sum of that transfer and the fee transfer must not exceed the caller-supplied `amount`; otherwise the handler collects assets the depositor receives no shares for, which is precisely the inflation-attack leak this variant exists to prevent.",
+    "title": "exact_fee_deposit_never_over_collects_assets"
+  },
+  {
+    "sort": "safety_property",
+    "description": "There must exist an execution of `process_deposit_with_fee` with a solvent vault, `vault.fee_bps` strictly below 10000, correctly matched vault-derived accounts, a signing authority and an `amount` large enough to buy at least one share, in which the handler returns success and mints a positive number of shares \u2014 confirming the guard stack has not made the fee-deposit path dead.",
+    "title": "legitimate_fee_deposit_is_reachable"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "Both fee-deposit handlers must remain usable when the vault has no outstanding shares: for any vault with vault.shares == 0 and vault.fee_bps < 10000 there must exist an `amount` for which `process_deposit_with_fee` succeeds and mints a strictly positive number of shares, regardless of how large vault.assets is \u2014 today `convert_assets_to_shares` returns floor(net * 0 / assets) = 0 once vault.assets > 0 while vault.shares == 0, so `process_deposit_with_fee` always fails the `require_gt!(amt, 0)` guard in `Vault::mint_shares` and `process_deposit_with_fee_exact` always fails with MathOverflow when `convert_shares_to_assets(0)` divides by num_shares() == 0, meaning an attacker who transfers one asset token to the vault's asset PDA and calls the permissionless `process_update_reward` permanently kills all deposits into that vault and strands the donated assets (no shares exist that could be burned to recover them).",
+    "title": "fee_deposit_bricked_when_share_supply_is_zero"
+  },
+  {
+    "sort": "safety_property",
+    "description": "Started from the same Vault pre-state with the same `amount`, `process_deposit_with_fee_exact` must mint exactly the same number of shares to `user_shares_account` as `process_deposit_with_fee` would, and the total debited from `user_assets_account` (net transfer plus fee transfer) must be no greater than the total the plain variant debits, so the over-collection protection is never paid for by the depositor; if the exact variant mints fewer shares or debits more assets for the same request, depositors are silently worse off on the path they are told is safer (a relational rule that invokes both handlers/operations on two copies of one arbitrary vault state).",
+    "title": "exact_fee_deposit_is_a_refinement_of_plain_fee_deposit"
+  },
+  {
+    "sort": "safety_property",
+    "description": "Spanning a two-instruction sequence: if `process_deposit_with_fee` or `process_deposit_with_fee_exact` succeeds and mints s > 0 shares while debiting n assets into `vault_assets_account`, then an immediately following `process_redeem_shares(s)` by the same user against the same vault must succeed and must pay out at most n assets \u2014 failure of the first half means the depositor's assets are permanently stranded (the exact variant never increments `vault.shares`, so `burn_shares(s)` underflows and the position can never be unwound), and failure of the second half means deposit/redeem round-tripping extracts assets belonging to other share holders.",
+    "title": "fee_deposit_shares_are_redeemable_without_profit"
+  },
+  {
+    "sort": "safety_property",
+    "description": "For both `process_deposit_with_fee` and `process_deposit_with_fee_exact`, the number of shares passed to the `mint_to` CPI must be at least the pre-deposit conversion of the assets actually transferred into `vault_assets_account` (i.e. at least `t` when vault.shares == vault.assets before the call, otherwise at least floor(t * vault.shares_before / vault.assets_before), where t is the amount argument of the transfer into `vault_assets_account`); if the handler mints fewer shares than the net assets it debits are worth, the depositor's assets are silently confiscated and redistributed to existing share holders.",
+    "title": "depositor_receives_full_value_for_net_deposit"
+  },
+  {
+    "sort": "safety_property",
+    "description": "In `process_deposit_with_fee_exact`, the amount argument of the SPL Token transfer to `vault_fee_account` must never exceed floor(amount * vault.fee_bps / 10000), the maximum fee implied by the caller's requested `amount` and the vault's advertised rate; since this variant applies the basis-point rate a second time to a recomputed figure, a wrong basis would overcharge the depositor beyond the advertised fee while still keeping the two transfers' sum within `amount`.",
+    "title": "exact_fee_never_exceeds_consented_bps_of_requested_amount"
+  }
+]

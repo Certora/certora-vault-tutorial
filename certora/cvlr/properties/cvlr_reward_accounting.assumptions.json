@@ -1,0 +1,66 @@
+{
+  "rule_subjects": [
+    {
+      "subject": "program_function",
+      "rule": "rule_update_reward_syncs_assets_to_balance",
+      "function": "crate::processor::process_update_reward"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_update_reward_rejects_balance_below_assets",
+      "function": "crate::processor::process_update_reward"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_update_reward_never_dilutes_shares",
+      "function": "crate::processor::process_update_reward"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_update_reward_config_untouched",
+      "function": "crate::processor::process_update_reward"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_update_reward_moves_no_value",
+      "function": "crate::processor::process_update_reward"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_update_reward_preserves_solvency",
+      "function": "crate::processor::process_update_reward"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_update_reward_preserves_fee_backing",
+      "function": "crate::processor::process_update_reward"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_update_reward_rejects_foreign_owned_vault",
+      "function": "crate::processor::process_update_reward"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_update_reward_rejects_foreign_owned_assets_account",
+      "function": "crate::processor::process_update_reward"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_update_reward_rejects_non_canonical_assets_account",
+      "function": "crate::processor::process_update_reward"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_update_reward_no_assets_with_zero_shares",
+      "function": "crate::processor::process_update_reward"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_update_reward_reachable_without_signer",
+      "function": "crate::processor::process_update_reward"
+    }
+  ],
+  "summaries": [],
+  "munges": []
+}

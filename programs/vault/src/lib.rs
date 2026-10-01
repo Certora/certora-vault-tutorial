@@ -11,3 +11,6 @@ pub use errors::{VaultError, VaultResult};
 use solana_program::declare_id;
 
 declare_id!("CRTRcNtiG8u4EFNkVnQkKcFYRRkLa2LtFPbihbsrcbJY");
+
+#[cfg(feature = "certora")]
+mod certora;

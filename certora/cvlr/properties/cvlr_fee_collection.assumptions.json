@@ -1,0 +1,135 @@
+{
+  "rule_subjects": [
+    {
+      "subject": "program_function",
+      "rule": "rule_admin_signer_required_for_collect_fee",
+      "function": "crate::processor::process_collect_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_collect_fee_transfers_exactly_recorded_fee",
+      "function": "crate::processor::process_collect_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_collect_fee_zeroes_fee_amount",
+      "function": "crate::processor::process_collect_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_collect_fee_preserves_assets_and_shares",
+      "function": "crate::processor::process_collect_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_collect_fee_config_immutable",
+      "function": "crate::processor::process_collect_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_collect_fee_must_not_spend_share_backing_assets",
+      "function": "crate::processor::process_collect_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_collect_fee_requires_program_owned_vault",
+      "function": "crate::processor::process_collect_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_collect_fee_requires_derived_vault_assets_pda",
+      "function": "crate::processor::process_collect_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_collect_fee_rejects_self_transfer",
+      "function": "crate::processor::process_collect_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_collect_fee_reachable_for_admin",
+      "function": "crate::processor::process_collect_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_vault_invariants_preserved_deposit",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_vault_invariants_preserved_deposit_exact",
+      "function": "crate::processor::process_deposit_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_vault_invariants_preserved_deposit_with_fee",
+      "function": "crate::processor::process_deposit_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_vault_invariants_preserved_deposit_with_fee_exact",
+      "function": "crate::processor::process_deposit_with_fee_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_vault_invariants_preserved_redeem_shares",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_vault_invariants_preserved_update_reward",
+      "function": "crate::processor::process_update_reward"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_vault_invariants_preserved_slash",
+      "function": "crate::processor::process_slash"
+    }
+  ],
+  "summaries": [],
+  "munges": [
+    {
+      "path": "programs/vault/src/lib.rs",
+      "module": "processor",
+      "substitute": "//! Certora stand-in for `src/processor/mod.rs`, in force only for the\n//! `unit_fee_collection` unit.\n//!\n//! It is declaration-for-declaration the developer's `processor/mod.rs`: the same eight\n//! submodules, compiled from the very same source files (named here with `#[path]`\n//! because this file sits elsewhere in the tree), and the same `pub use` re-exports.\n//!\n//! The one addition is `collect_fee`. The repository contains\n//! `src/processor/collect_fee.rs` but never declares it, and the file carries no `use`\n//! lines of its own, so it is mounted here as an inline module that supplies exactly the\n//! five imports it needs and then textually includes the file, unmodified.\n\n#[path = \"../../processor/deposit.rs\"]\npub mod deposit;\n#[path = \"../../processor/deposit_exact.rs\"]\npub mod deposit_exact;\n#[path = \"../../processor/deposit_with_fee.rs\"]\npub mod deposit_with_fee;\n#[path = \"../../processor/deposit_with_fee_exact.rs\"]\npub mod deposit_with_fee_exact;\n#[path = \"../../processor/redeem_shares.rs\"]\npub mod redeem_shares;\n#[path = \"../../processor/slash.rs\"]\npub mod slash;\n#[path = \"../../processor/update_reward.rs\"]\npub mod update_reward;\n\n#[path = \"../../processor/spl_token_utils.rs\"]\npub mod spl_token_utils;\n\npub mod collect_fee {\n    use crate::loaders::CollectFeeContext;\n    use crate::operations::vault_collect_fee;\n    use crate::processor::spl_token_utils::spl_transfer_assets_from_vault;\n    use solana_program::account_info::AccountInfo;\n    use solana_program::entrypoint::ProgramResult;\n\n    include!(concat!(\n        env!(\"CARGO_MANIFEST_DIR\"),\n        \"/src/processor/collect_fee.rs\"\n    ));\n}\n\npub use collect_fee::*;\npub use deposit::*;\npub use deposit_exact::*;\npub use deposit_with_fee::*;\npub use deposit_with_fee_exact::*;\npub use redeem_shares::*;\npub use slash::*;\npub use spl_token_utils::*;\npub use update_reward::*;\n",
+      "why": "What the stand-in drops: nothing. `src/processor/mod.rs` contains no executable code \u2014 it is eight `pub mod` declarations and eight `pub use` globs \u2014 and the stand-in reproduces every one of them, compiling the same eight files (`deposit.rs`, `deposit_exact.rs`, `deposit_with_fee.rs`, `deposit_with_fee_exact.rs`, `redeem_shares.rs`, `slash.rs`, `update_reward.rs`, `spl_token_utils.rs`) byte for byte via `#[path]`, under the same module names and at the same place in the module tree, so `super::spl_transfer_assets_from_vault` in `slash.rs`, `super::spl_token_account_amount` in `update_reward.rs` and the `crate::processor::{..}` imports in the deposit handlers all resolve exactly as before. No handler body, loader, operation or CPI helper is re-authored, so every rule in the batch still runs against the developers' code. (`#[path]` on a module declared at the top level of a non-`mod.rs` file resolves relative to the directory holding that file \u2014 `src/certora/mocks/` \u2014 hence `../../processor/<file>.rs`.)\n\nWhat it adds, and why the author cannot state the properties without it: `src/processor/collect_fee.rs` exists in the repository but is declared by nothing, so `crate::processor::process_collect_fee` does not resolve and nine of the eleven `fee_collection` properties \u2014 the amount handed to the transfer, its destination, the signer seeds, the write-back of the cleared fee \u2014 can only be approximated by driving `CollectFeeContext::load` and `vault_collect_fee` separately, leaving the handler's own glue unchecked. No kind in the charter adds a module declaration, and the file has no `use` line to rewrite either, so the parent module's declaration is the smallest handle that reaches it.\n\nThe five `use` lines in the inline `collect_fee` module are the only code here I authored rather than re-mounted, so they are written out in full and they bind to the program's own items: `crate::loaders::CollectFeeContext` (re-exported by `loaders/mod.rs` from `loaders::vault_with_fee_loaders`, whose fields `vault_info, vault_assets_account, assets_mint, fee_collect_account, authority, spl_token_program` are exactly the destructuring in the handler); `crate::operations::vault_collect_fee`, i.e. `crate::operations::vault_fee_operations::vault_collect_fee`, re-exported by `operations/mod.rs`; `crate::processor::spl_token_utils::spl_transfer_assets_from_vault`, the real CPI helper in the module re-mounted above, not a stand-in; and `solana_program::account_info::AccountInfo` and `solana_program::entrypoint::ProgramResult` for the signature. `crate::vault_assets_account_seeds_with_bump!` is `#[macro_export]`ed and needs no import. Nothing else is in scope that was not in scope for a sibling handler.\n\nThe body itself is `include!`d from `concat!(env!(\"CARGO_MANIFEST_DIR\"), \"/src/processor/collect_fee.rs\")` \u2014 an absolute path to the developers' file \u2014 so it is their text, not mine: no check added, none removed, nothing reordered. The omissions the batch is written to expose (CollectFeeContext omits the vault-assets PDA re-derivation, there is no self-transfer guard, the payout is not bounded by the token-account balance) are all still there and still reachable.\n\nScope and standing: the redirect is gated on `unit_fee_collection`, so the deployed build and the other five units compile `src/processor/mod.rs` exactly as written. Note also that `process_collect_fee` is not named by `CertoraVaultInstruction` and this crate has no entrypoint dispatch, so the verdicts are about a handler the shipped program does not currently expose \u2014 as is true of several sibling handlers here.",
+      "feature": "unit_fee_collection"
+    },
+    {
+      "path": "programs/vault/src/processor/spl_token_utils.rs",
+      "function": "spl_transfer_assets_from_user",
+      "kind": {
+        "stand_in": "crate::certora::specs::fee_collection::spl_transfer_assets_from_user"
+      },
+      "why": "Under `unit_fee_collection` only, this wrapper is replaced by the author's stand-in of the identical signature. The original builds a real `spl_token::instruction::transfer` (`TokenInstruction::pack` plus `Vec<AccountMeta>` assembly) before `invoke`; that encoder contains loops the Prover cannot discharge at `loop_iter: 2`, so any rule reaching this wrapper stops on \"loop has terminated\" inside `spl_token::instruction::*` before its postcondition. The stand-in returns `Ok(())` and performs no CPI. What is dropped: the encoded instruction bytes, the account-meta list, and the `invoke` itself \u2014 plus the error path where `spl_token::instruction::transfer` rejects its arguments, so under this feature the wrapper can no longer fail. No property in this unit's batch is about the encoded bytes or about a real SPL token-account balance (the Prover does not model a CPI's effects in any case); the rules only read the vault state the handler itself writes, and property 7 models the token balance as a free `u64`. A property asserting that a token transfer actually moved assets, or that this wrapper propagates an encoder error, would be false under this mock.",
+      "feature": "unit_fee_collection"
+    },
+    {
+      "path": "programs/vault/src/processor/spl_token_utils.rs",
+      "function": "spl_transfer_assets_from_vault",
+      "kind": {
+        "stand_in": "crate::certora::specs::fee_collection::spl_transfer_assets_from_vault"
+      },
+      "why": "Under `unit_fee_collection` only, this vault-signed transfer wrapper is replaced by the author's stand-in of the identical signature. The original builds a real `spl_token::instruction::transfer` before `invoke_signed`; that encoder's loops are what a rule through `process_collect_fee` stops on at `loop_iter: 2`. The stand-in performs no CPI: it records the amount, the source and destination keys and the three signer seeds into `static mut` scalars and returns `Ok(())`, which is exactly what this unit's central property (`collect_fee_transfers_exactly_recorded_fee`) needs \u2014 it is about *what the handler asked for*, not about bytes moved. What is dropped: the encoded instruction, the `invoke_signed` call and its effects, and the error path where the encoder rejects its arguments, so under this feature the wrapper cannot fail and `process_collect_fee` has one fewer way to return `Err`. Since the Prover does not model a CPI's effects anyway, nothing is lost against its model; but a property about an actual SPL token-account balance after the transfer, or about this wrapper propagating an encoder error, would be false under this mock.",
+      "feature": "unit_fee_collection"
+    },
+    {
+      "path": "programs/vault/src/processor/spl_token_utils.rs",
+      "function": "spl_mint_shares",
+      "kind": {
+        "stand_in": "crate::certora::specs::fee_collection::spl_mint_shares"
+      },
+      "why": "Under `unit_fee_collection` only, this wrapper is replaced by the author's stand-in of the identical signature. The original builds a real `spl_token::instruction::mint_to` before `invoke_signed`; the encoder's loops block the deposit handlers this unit's `vault_config_fields_immutable` / `fee_amount_only_cleared_by_collect_fee` rules drive. The stand-in returns `Ok(())` and performs no CPI. What is dropped: the encoded instruction, the `invoke_signed` call, and the encoder's error path, so under this feature minting can no longer fail. The rules that reach it only assert over the vault state the handler writes itself; a property about the shares mint's real supply, or about this wrapper propagating an encoder error, would be false under this mock.",
+      "feature": "unit_fee_collection"
+    },
+    {
+      "path": "programs/vault/src/processor/spl_token_utils.rs",
+      "function": "spl_burn_shares",
+      "kind": {
+        "stand_in": "crate::certora::specs::fee_collection::spl_burn_shares"
+      },
+      "why": "Under `unit_fee_collection` only, this wrapper is replaced by the author's stand-in of the identical signature. The original builds a real `spl_token::instruction::burn` before `invoke`; the encoder's loops block the `process_redeem_shares` rule in this batch. The stand-in returns `Ok(())` and performs no CPI. What is dropped: the encoded instruction, the `invoke` call, and the encoder's error path, so under this feature burning can no longer fail. The rule that reaches it only asserts over the vault state the handler writes itself; a property about the shares mint's real supply or about an encoder error being propagated would be false under this mock.",
+      "feature": "unit_fee_collection"
+    }
+  ]
+}

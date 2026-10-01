@@ -1,0 +1,60 @@
+{
+  "redeem_preserves_solvency": [
+    "rule_redeem_preserves_solvency"
+  ],
+  "redeem_payout_equals_floor_of_pre_ratio": [
+    "rule_redeem_payout_equals_floor_of_pre_ratio"
+  ],
+  "redeem_burns_exactly_requested_shares_and_cpi_amounts_match": [
+    "rule_redeem_burns_exactly_requested_shares",
+    "rule_redeem_cpi_amounts_match"
+  ],
+  "redeem_does_not_dilute_remaining_holders": [
+    "rule_redeem_does_not_dilute_remaining_holders"
+  ],
+  "redeem_rejects_over_redemption_without_wrapping": [
+    "rule_redeem_rejects_over_redemption_without_wrapping"
+  ],
+  "redeem_requires_authority_signature": [
+    "rule_redeem_requires_authority_signature"
+  ],
+  "redeem_requires_vault_info_owned_by_program": [
+    "rule_redeem_requires_vault_info_owned_by_program"
+  ],
+  "redeem_vault_assets_account_must_be_canonical_pda": [
+    "rule_redeem_vault_assets_account_is_canonical_pda",
+    "rule_redeem_vault_assets_account_matches_vault_record"
+  ],
+  "redeem_shares_mint_must_be_canonical_pda": [
+    "rule_redeem_shares_mint_is_canonical_pda",
+    "rule_redeem_shares_mint_matches_vault_record"
+  ],
+  "redeem_rejects_vault_to_self_transfer": [
+    "rule_redeem_rejects_vault_to_self_transfer"
+  ],
+  "redeem_cpis_only_to_canonical_spl_token_program": [
+    "rule_redeem_cpis_only_to_canonical_spl_token_program",
+    "rule_redeem_burn_ix_builder",
+    "rule_redeem_transfer_ix_builder"
+  ],
+  "redeem_leaves_vault_config_unchanged": [
+    "rule_redeem_leaves_vault_config_unchanged"
+  ],
+  "redeem_reachable_for_legitimate_user": [
+    "rule_redeem_reachable_for_legitimate_user"
+  ],
+  "deposit_then_redeem_round_trip_no_profit": [
+    "rule_deposit_then_redeem_round_trip_no_profit"
+  ],
+  "redeem_never_leaves_shareless_vault_with_assets": [
+    "rule_redeem_never_leaves_shareless_vault_with_assets"
+  ],
+  "redeem_requires_distinct_asset_and_share_mints": [
+    "rule_redeem_requires_distinct_asset_and_share_mints"
+  ],
+  "redeem_cpi_moves_assets_from_vault_to_named_user_account": [
+    "rule_redeem_cpi_accounts_and_direction",
+    "rule_redeem_burn_ix_builder",
+    "rule_redeem_transfer_ix_builder"
+  ]
+}

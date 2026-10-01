@@ -12,6 +12,13 @@ crate-type = ["cdylib", "lib"]
 name = "certora_vault"
 
 [features]
+unit_standard_deposits = []
+unit_fee_based_deposits = []
+unit_fee_collection = []
+unit_redemption = []
+unit_reward_accounting = []
+unit_slashing = []
+certora = ["no-entrypoint", "dep:cvlr", "dep:cvlr-solana", "dep:cvlr-solana-stake", "dep:cvlr-spl-token"]
 default = []
 no-entrypoint = []
 cpi = ["no-entrypoint"]
@@ -23,3 +30,28 @@ spl-token.workspace = true
 bytemuck.workspace = true
 num_enum.workspace = true
 
+
+
+# === Certora CVLR — added by AutoProver ===
+[dependencies.cvlr]
+workspace = true
+optional = true
+
+[dependencies.cvlr-solana]
+workspace = true
+optional = true
+
+[dependencies.cvlr-solana-stake]
+workspace = true
+optional = true
+
+[dependencies.cvlr-spl-token]
+workspace = true
+optional = true
+
+[package.metadata.certora]
+# "Cargo.toml" is included: `.certora_sources` is what the report and the
+# counterexample analyzer read, and a source tree with no manifest cannot be rebuilt.
+sources = ["Cargo.toml", "src/**/*.rs"]
+solana_inlining = ["src/certora/envs/cvlr_inlining.txt"]
+solana_summaries = ["src/certora/envs/cvlr_summaries.txt"]

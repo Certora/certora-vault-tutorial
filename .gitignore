@@ -8,3 +8,6 @@ certora_out
 .certora
 .certora_internal
 certora_out
+
+# Certora Prover build output
+.cvlr_work

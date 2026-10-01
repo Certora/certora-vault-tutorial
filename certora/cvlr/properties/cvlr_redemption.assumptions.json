@@ -1,0 +1,137 @@
+{
+  "rule_subjects": [
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_preserves_solvency",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_payout_equals_floor_of_pre_ratio",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_burns_exactly_requested_shares",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_cpi_amounts_match",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_does_not_dilute_remaining_holders",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_rejects_over_redemption_without_wrapping",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_requires_authority_signature",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_requires_vault_info_owned_by_program",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_vault_assets_account_matches_vault_record",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_vault_assets_account_is_canonical_pda",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_shares_mint_matches_vault_record",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_shares_mint_is_canonical_pda",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_rejects_vault_to_self_transfer",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_cpis_only_to_canonical_spl_token_program",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_leaves_vault_config_unchanged",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_never_leaves_shareless_vault_with_assets",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_requires_distinct_asset_and_share_mints",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_cpi_accounts_and_direction",
+      "function": "crate::processor::process_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_reachable_for_legitimate_user",
+      "function": "crate::operations::vault_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_deposit_then_redeem_round_trip_no_profit",
+      "function": "crate::operations::vault_redeem_shares"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_burn_ix_builder",
+      "function": "crate::processor::spl_token_utils::build_burn_shares_ix"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_redeem_transfer_ix_builder",
+      "function": "crate::processor::spl_token_utils::build_transfer_assets_from_vault_ix"
+    }
+  ],
+  "summaries": [],
+  "munges": [
+    {
+      "path": "programs/vault/src/processor/spl_token_utils.rs",
+      "function": "spl_transfer_assets_from_vault",
+      "extracted_name": "build_transfer_assets_from_vault_ix",
+      "original": "pub fn spl_transfer_assets_from_vault<'a>(\n    amount: u64,\n    vault_assets: &AccountInfo<'a>,\n    user_assets: &AccountInfo<'a>,\n    _mint: &AccountInfo<'a>,\n    spl_token_program: &AccountInfo<'a>,\n    vault_assets_signer_seeds: &[&[u8]],\n) -> ProgramResult {\n    let ix = spl_token::instruction::transfer(\n        spl_token_program.key,\n        vault_assets.key,\n        user_assets.key,\n        vault_assets.key,\n        &[],\n        amount,\n    )?;\n    invoke_signed(\n        &ix,\n        &[\n            vault_assets.clone(),\n            user_assets.clone(),\n            spl_token_program.clone(),\n        ],\n        &[vault_assets_signer_seeds],\n    )\n}",
+      "replacement": "#[cfg_attr(feature = \"certora\", cvlr::mock_fn(with = crate::certora::specs::redemption::spl_transfer_assets_from_vault))]\npub fn spl_transfer_assets_from_vault<'a>(\n    amount: u64,\n    vault_assets: &AccountInfo<'a>,\n    user_assets: &AccountInfo<'a>,\n    _mint: &AccountInfo<'a>,\n    spl_token_program: &AccountInfo<'a>,\n    vault_assets_signer_seeds: &[&[u8]],\n) -> ProgramResult {\n    let ix = build_transfer_assets_from_vault_ix(\n        amount,\n        vault_assets.key,\n        user_assets.key,\n        spl_token_program.key,\n    )?;\n    invoke_signed(\n        &ix,\n        &[\n            vault_assets.clone(),\n            user_assets.clone(),\n            spl_token_program.clone(),\n        ],\n        &[vault_assets_signer_seeds],\n    )\n}",
+      "extracted": "/// The SPL Token `transfer` instruction that `spl_transfer_assets_from_vault`\n/// issues, lifted out of the wrapper so a rule can build and inspect it\n/// without issuing the CPI. The account parameters keep the wrapper's own\n/// order: `vault_assets` is the wrapper's first account parameter and\n/// `user_assets` its second.\npub fn build_transfer_assets_from_vault_ix(\n    amount: u64,\n    vault_assets: &solana_program::pubkey::Pubkey,\n    user_assets: &solana_program::pubkey::Pubkey,\n    spl_token_program: &solana_program::pubkey::Pubkey,\n) -> Result<solana_program::instruction::Instruction, ProgramError> {\n    spl_token::instruction::transfer(\n        spl_token_program,\n        vault_assets,\n        user_assets,\n        vault_assets,\n        &[],\n        amount,\n    )\n}",
+      "why": "This one edit does two things the author asked for, because the tool will not let a `mock_fn` attribute and a split sit on the same function: the attribute would land on the copy left for everyone else and stop doing anything.\n\n**The split (problem 2).** Property 17 \u2014 \"the transfer CPI must debit `vault_assets_account` and credit `user_assets_account`, never the reverse\" \u2014 has two halves. A recording stand-in for the wrapper shows which of the handler's accounts reach the wrapper's first and second account parameters; it cannot show what the program then does with them, because the direction lives in the argument order of the `spl_token::instruction::transfer(..)` call, whose result is a local `Instruction` with no boundary around it. `build_transfer_assets_from_vault_ix` gives that line a boundary a rule can call, so it can assert over the returned `Instruction` which pubkey lands in the source meta, which in the destination meta, and which program id is targeted \u2014 chaining with the stand-in's record to close property 17.\n\nThe split is behaviour-preserving. The builder receives exactly the `.key` values the original passed: `spl_token_program.key`, `vault_assets.key`, `user_assets.key`, and `vault_assets.key` again as the token authority \u2014 it is the same pubkey as the source, which is why the extracted function takes three keys rather than four. The `&[]` multisig list and `amount` are unchanged, the `?` still propagates the builder's `ProgramError` out of the wrapper unchanged, and `invoke_signed` is still called with the same instruction, the same three `AccountInfo` clones in the same order, and the same signer seeds. `_mint` and `vault_assets_signer_seeds` take no part in building the instruction, so they are not passed on. No check removed, no effect reordered, signature identical.\n\n**The attribute on the replacement (problem 1).** Under `certora` + `unit_redemption` the wrapper resolves to the author's recording stand-in `crate::certora::specs::redemption::spl_transfer_assets_from_vault`, which has the identical signature, records `amount`, the keys handed to its `vault_assets`, `user_assets` and `_mint` parameters and the target program account, and returns `Ok(())`. What that drops is the wrapper's instruction construction and its `invoke_signed` of the SPL Token program, including the PDA signer seeds. The Prover already treats `solana_program::program::invoke_signed` as an unmodelled external call that moves no tokens and returns an arbitrary result \u2014 the author's last report listed it under \"neither analyzed nor summarized\" and the counterexample showed every token amount byte-identical across a successful `process_redeem_shares` \u2014 so no modelled asset movement is lost. Two things are gained: the handler's transfer request becomes observable (properties 3-CPI-half, 11, 17), and the call can no longer return a spurious `Err`, which is what made the acceptance rule `rule_redeem_reachable_for_legitimate_user` (property 13) unprovable.\n\nWhat a reader must not conclude: under this unit nothing is proved about token balances actually moved, about the signer seeds being the correct vault-assets PDA seeds, or about errors the real builder could raise at run time inside the handler \u2014 the builder's error path is now only reachable from the rule that calls `build_transfer_assets_from_vault_ix` directly.\n\nThe inner attribute is gated on `certora` and the whole item on `unit_redemption`, so the mock exists only when both are on, as the author requires; the deployed build and every other unit compile the original function verbatim, keeping their own `unit_fee_collection` attribute. `build_transfer_assets_from_vault_ix` is `pub` in `crate::processor::spl_token_utils`, which `processor/mod.rs` declares `pub mod` and re-exports, so the harness can name it.",
+      "feature": "unit_redemption"
+    },
+    {
+      "path": "programs/vault/src/processor/spl_token_utils.rs",
+      "function": "spl_burn_shares",
+      "extracted_name": "build_burn_shares_ix",
+      "original": "pub fn spl_burn_shares<'a>(\n    amount: u64,\n    user_shares_account: &AccountInfo<'a>,\n    mint: &AccountInfo<'a>,\n    authority: &AccountInfo<'a>,\n    spl_token_program: &AccountInfo<'a>,\n) -> ProgramResult {\n    let ix = spl_token::instruction::burn(\n        spl_token_program.key,\n        user_shares_account.key,\n        mint.key,\n        authority.key,\n        &[],\n        amount,\n    )?;\n    invoke(\n        &ix,\n        &[\n            user_shares_account.clone(),\n            mint.clone(),\n            authority.clone(),\n            spl_token_program.clone(),\n        ],\n    )\n}",
+      "replacement": "#[cfg_attr(feature = \"certora\", cvlr::mock_fn(with = crate::certora::specs::redemption::spl_burn_shares))]\npub fn spl_burn_shares<'a>(\n    amount: u64,\n    user_shares_account: &AccountInfo<'a>,\n    mint: &AccountInfo<'a>,\n    authority: &AccountInfo<'a>,\n    spl_token_program: &AccountInfo<'a>,\n) -> ProgramResult {\n    let ix = build_burn_shares_ix(\n        amount,\n        user_shares_account.key,\n        mint.key,\n        authority.key,\n        spl_token_program.key,\n    )?;\n    invoke(\n        &ix,\n        &[\n            user_shares_account.clone(),\n            mint.clone(),\n            authority.clone(),\n            spl_token_program.clone(),\n        ],\n    )\n}",
+      "extracted": "/// The SPL Token `burn` instruction that `spl_burn_shares` issues, lifted out\n/// of the wrapper so a rule can build and inspect it without issuing the CPI.\n/// The account parameters keep the wrapper's own order: `user_shares_account`\n/// is the wrapper's first account parameter, `mint` its second and\n/// `authority` its third.\npub fn build_burn_shares_ix(\n    amount: u64,\n    user_shares_account: &solana_program::pubkey::Pubkey,\n    mint: &solana_program::pubkey::Pubkey,\n    authority: &solana_program::pubkey::Pubkey,\n    spl_token_program: &solana_program::pubkey::Pubkey,\n) -> Result<solana_program::instruction::Instruction, ProgramError> {\n    spl_token::instruction::burn(\n        spl_token_program,\n        user_shares_account,\n        mint,\n        authority,\n        &[],\n        amount,\n    )\n}",
+      "why": "The same two-in-one edit as for the transfer wrapper, and for the same reason: the tool will not let a `mock_fn` attribute and a split sit on one function, because the attribute would land on the copy left for every other build and stop doing anything.\n\n**The split (problem 2).** The author needs to assert over the `Instruction` the program's own `spl_token::instruction::burn(..)` line produces \u2014 which account ends up in which meta position and which program id it targets. That `Instruction` is a local inside `spl_burn_shares` with no boundary around it, and the only callable thing was the whole wrapper, whose `invoke` the Prover does not model. `build_burn_shares_ix` is that boundary.\n\nThe split is behaviour-preserving. The builder receives exactly the four `.key` values the original passed, in the same roles (`spl_token_program.key` as the program id, then account, mint, authority), with the same `&[]` multisig list and the same `amount`; the `?` still propagates the builder's `ProgramError` out of the wrapper unchanged; `invoke` is still called with the same instruction and the same four `AccountInfo` clones in the same order. No check removed, no effect reordered, signature identical.\n\n**The attribute on the replacement (problem 1).** Under `certora` + `unit_redemption` the wrapper resolves to the author's recording stand-in `crate::certora::specs::redemption::spl_burn_shares`, which has the identical signature, records `amount` and the keys of the four accounts it was handed, and returns `Ok(())`. What that drops is the wrapper's instruction construction and its `invoke` of the SPL Token program. The Prover already treats `solana_program::program::invoke` as an unmodelled external call \u2014 the author's report listed it under \"neither analyzed nor summarized\", and the counterexample showed `user_shares_tok_before = 1697` unchanged across a successful redemption of `amount = 1` \u2014 so no modelled supply or balance effect is lost. Gained: the handler's burn request becomes observable (properties 3-CPI-half, 11, 17), and `spl_burn_shares(..)?` can no longer return an arbitrary `Err`, which is exactly what made the acceptance rule `rule_redeem_reachable_for_legitimate_user` (property 13) unprovable at handler level.\n\nWhat a reader must not conclude: no rule under this unit says anything about shares actually destroyed on the token side, nor about errors the real `burn` builder could raise inside the handler \u2014 that error path is now reachable only from a rule calling `build_burn_shares_ix` directly.\n\nThe inner attribute is gated on `certora` and the whole item on `unit_redemption`, so the mock exists only when both are on; the deployed build and every other unit compile the original function verbatim, keeping their own `unit_fee_collection` attribute. `build_burn_shares_ix` is `pub` in `crate::processor::spl_token_utils`, a `pub mod` that `processor/mod.rs` re-exports, so the harness can name it.",
+      "feature": "unit_redemption"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+[
+  {
+    "sort": "safety_property",
+    "description": "process_collect_fee may succeed only if the passed `authority` account is a signer and its key equals the `admin` field stored in the vault account at entry; on any other authority it must revert leaving vault.fee_amount unchanged and issuing no token transfer, otherwise anyone can drain the vault's accumulated fees.",
+    "title": "admin_signer_required_for_collect_fee"
+  },
+  {
+    "sort": "safety_property",
+    "description": "On a successful process_collect_fee the program issues exactly one SPL-Token transfer whose amount equals the vault.fee_amount value read at entry, whose source is vault.vault_assets_account, whose destination is the passed fee_collect_account, and which is signed with the vault-assets PDA seeds; transferring more would let the admin take assets that back depositor shares, transferring less would zero the fee while paying out nothing.",
+    "title": "collect_fee_transfers_exactly_recorded_fee"
+  },
+  {
+    "sort": "safety_property",
+    "description": "After a successful process_collect_fee the vault's fee_amount field is exactly zero, so a second call in the same or a later transaction pays out nothing; if the field were left non-zero the admin could replay the claim and repeatedly drain the vault asset token account.",
+    "title": "collect_fee_zeroes_fee_amount"
+  },
+  {
+    "sort": "safety_property",
+    "description": "process_collect_fee leaves vault.assets and vault.shares unchanged (fees are accounted separately from share-backing assets), so the solvency relation shares <= assets is preserved and no share holder is diluted or under-backed by a fee claim.",
+    "title": "collect_fee_preserves_assets_and_shares"
+  },
+  {
+    "sort": "invariant",
+    "description": "No instruction handler in the program (process_deposit, process_deposit_exact, process_deposit_with_fee, process_deposit_with_fee_exact, process_redeem_shares, process_update_reward, process_slash, process_collect_fee) modifies vault.admin, vault.slash_admin, vault.assets_mint, vault.shares_mint, vault.fee_token_account, vault.vault_assets_account, vault.fee_bps, vault.vault_assets_account_bump or vault.vault_shares_mint_bump \u2014 otherwise fee-collection authority or the vault's token/mint bindings could be hijacked through an unrelated instruction.",
+    "title": "vault_config_fields_immutable"
+  },
+  {
+    "sort": "invariant",
+    "description": "vault.fee_amount is never decreased by any handler other than process_collect_fee (checked across process_deposit, process_deposit_exact, process_deposit_with_fee, process_deposit_with_fee_exact, process_redeem_shares, process_update_reward, process_slash), and process_collect_fee decreases it exactly to zero; any other decrease silently destroys accrued protocol fees.",
+    "title": "fee_amount_only_cleared_by_collect_fee"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "Starting from a state in which the vault asset token account balance covers the recorded assets but not the recorded fee (balance >= vault.assets and balance < vault.assets + vault.fee_amount \u2014 reachable because process_update_reward syncs vault.assets to the raw token-account balance, which already includes the accrued fee), process_collect_fee pays out fee_amount without ever reading the token balance and leaves the account holding less than vault.assets, so later redemptions of legitimate shares fail; the handler should bound the payout by balance - vault.assets.",
+    "title": "collect_fee_must_not_spend_share_backing_assets"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "process_collect_fee must reject any vault_info account whose owner is not the certora_vault program, because VaultInfo::try_from deserializes the account with bytemuck and checks no owner and no discriminator, so a look-alike account whose `admin` is the attacker and whose fee_amount/bump are attacker-chosen is accepted as authoritative vault state.",
+    "title": "collect_fee_requires_program_owned_vault"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "process_collect_fee must re-derive the vault assets account as PDA(VAULT_ASSETS, vault_info.key, vault.vault_assets_account_bump) and require the passed vault_assets_account to equal it (the check DepositContext and SlashContext perform but CollectFeeContext omits), since the handler signs the transfer with exactly those seeds; without the re-derivation the transfer source and the PDA authority used to sign are not tied together and a non-canonical bump or a mis-recorded vault_assets_account is accepted.",
+    "title": "collect_fee_requires_derived_vault_assets_pda"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "process_collect_fee must reject a fee_collect_account equal to vault_assets_account; otherwise the CPI is a self-transfer that moves nothing while vault.fee_amount is zeroed, destroying the fee claim and leaving the assets to be re-classified as depositor reward by process_update_reward (the analogous SelfTransfer guard exists in process_deposit_with_fee).",
+    "title": "collect_fee_rejects_self_transfer"
+  },
+  {
+    "sort": "safety_property",
+    "description": "There exists an execution of process_collect_fee in which the recorded admin signs, the vault is program-owned and internally consistent, the vault assets account is the correctly derived PDA and fee_amount > 0, and the instruction succeeds \u2014 confirming the account checks do not make fee collection unreachable (dead handler / permanently stuck fees).",
+    "title": "collect_fee_reachable_for_admin"
+  }
+]

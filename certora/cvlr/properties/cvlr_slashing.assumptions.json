@@ -1,0 +1,77 @@
+{
+  "rule_subjects": [
+    {
+      "subject": "program_function",
+      "rule": "rule_slash_only_by_recorded_slash_admin_signer",
+      "function": "crate::processor::process_slash"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_slash_rejects_unsigned_authority",
+      "function": "crate::processor::process_slash"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_slash_rejects_wrong_authority_key",
+      "function": "crate::processor::process_slash"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_slash_decrements_assets_by_exactly_amount",
+      "function": "crate::processor::process_slash"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_slash_preserves_vault_solvency",
+      "function": "crate::processor::process_slash"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_slash_modifies_only_assets_field",
+      "function": "crate::processor::process_slash"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_slash_requires_vault_info_owned_by_program",
+      "function": "crate::processor::process_slash"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_slash_assets_account_matches_recorded_pubkey",
+      "function": "crate::processor::process_slash"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_slash_cpi_uses_token_program_and_own_pda_seeds",
+      "function": "crate::processor::process_slash"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_slash_transfer_ix_builder",
+      "function": "crate::processor::spl_token_utils::build_transfer_assets_from_vault_ix"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_slash_assets_mint_matches_vault_record",
+      "function": "crate::processor::process_slash"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_slash_accounting_accepts_legitimate_amount",
+      "function": "crate::operations::vault_process_slash"
+    }
+  ],
+  "summaries": [],
+  "munges": [
+    {
+      "path": "programs/vault/src/processor/spl_token_utils.rs",
+      "function": "spl_transfer_assets_from_vault",
+      "extracted_name": "build_transfer_assets_from_vault_ix",
+      "original": "pub fn spl_transfer_assets_from_vault<'a>(\n    amount: u64,\n    vault_assets: &AccountInfo<'a>,\n    user_assets: &AccountInfo<'a>,\n    _mint: &AccountInfo<'a>,\n    spl_token_program: &AccountInfo<'a>,\n    vault_assets_signer_seeds: &[&[u8]],\n) -> ProgramResult {\n    let ix = spl_token::instruction::transfer(\n        spl_token_program.key,\n        vault_assets.key,\n        user_assets.key,\n        vault_assets.key,\n        &[],\n        amount,\n    )?;\n    invoke_signed(\n        &ix,\n        &[\n            vault_assets.clone(),\n            user_assets.clone(),\n            spl_token_program.clone(),\n        ],\n        &[vault_assets_signer_seeds],\n    )\n}",
+      "replacement": "#[cfg_attr(feature = \"certora\", cvlr::mock_fn(with = crate::certora::specs::slashing::spl_transfer_assets_from_vault))]\npub fn spl_transfer_assets_from_vault<'a>(\n    amount: u64,\n    vault_assets: &AccountInfo<'a>,\n    user_assets: &AccountInfo<'a>,\n    _mint: &AccountInfo<'a>,\n    spl_token_program: &AccountInfo<'a>,\n    vault_assets_signer_seeds: &[&[u8]],\n) -> ProgramResult {\n    let ix = build_transfer_assets_from_vault_ix(\n        amount,\n        vault_assets.key,\n        user_assets.key,\n        spl_token_program.key,\n    )?;\n    invoke_signed(\n        &ix,\n        &[\n            vault_assets.clone(),\n            user_assets.clone(),\n            spl_token_program.clone(),\n        ],\n        &[vault_assets_signer_seeds],\n    )\n}",
+      "extracted": "/// The SPL Token `transfer` instruction that `spl_transfer_assets_from_vault`\n/// issues, lifted out of the wrapper so a rule can build and inspect it\n/// without issuing the CPI. The account parameters keep the wrapper's own\n/// order: `vault_assets` is the wrapper's first account parameter and\n/// `user_assets` its second.\npub fn build_transfer_assets_from_vault_ix(\n    amount: u64,\n    vault_assets: &solana_program::pubkey::Pubkey,\n    user_assets: &solana_program::pubkey::Pubkey,\n    spl_token_program: &solana_program::pubkey::Pubkey,\n) -> Result<solana_program::instruction::Instruction, ProgramError> {\n    spl_token::instruction::transfer(\n        spl_token_program,\n        vault_assets,\n        user_assets,\n        vault_assets,\n        &[],\n        amount,\n    )\n}",
+      "why": "Two things for `unit_slashing`, in one item because the mock attribute has to sit on the copy this unit compiles.\n\n(1) The split. `process_slash` ends in this wrapper, and the author needs to state, in a rule of its own, that the SPL Token instruction the program builds targets the token program account it was handed and names the vault assets account as both the debited source and the transfer authority. With the wrapper mocked there is no boundary a rule could drive to reach that construction, so the `spl_token::instruction::transfer(..)` call is lifted into `build_transfer_assets_from_vault_ix`. That half is a pure refactoring: the call is moved verbatim with the same six arguments in the same order, the wrapper propagates its error with the same `?`, and the following `invoke_signed` keeps the same account list and the same `&[vault_assets_signer_seeds]`. The wrapper's signature is unchanged, and the deployed build and every other unit compile the original byte for byte. This mirrors the arrangement `unit_redemption` already has in this file; the new builder is gated on `unit_slashing`, so the two copies never coexist in one build.\n\n(2) The `cfg_attr(feature = \"certora\", cvlr::mock_fn(..))` line on the replacement, which is the `mock_fn` kind applied to the copy this unit actually compiles (a `munge_function` attribute would have landed on the `cfg(not(feature = \"unit_slashing\"))` copy and done nothing). The wrapper builds a heap `Vec` of account metas and a bincode payload over loops the configured loop bound cannot discharge, and then issues `invoke_signed`, a CPI the Prover does not model; every rule driving the handler stops on the loop unwinding assertion before reaching the handler's own bookkeeping. Under the feature the wrapper is replaced by the author's existing recording stand-in `crate::certora::specs::slashing::spl_transfer_assets_from_vault`, identical in signature including `vault_assets_signer_seeds: &[&[u8]]`, which records the amount, the three account keys, the token program account and the signer seeds and returns `Ok(())`. What that drops is the cross-program call itself: no token balance moves and no error the real SPL Token program could return is modelled, so the transfer becomes unconditionally successful. A property about the tokens actually moved is therefore not provable under this arrangement; what is provable is the program's own accounting (the vault's recorded assets against the amount handed to the wrapper) and the request the handler made \u2014 target program, account routing, PDA signer seeds \u2014 which is the batch the author described. The Prover's own model of the CPI moves no tokens either, so nothing is lost against it. The `feature = \"certora\"` gate on the attribute is required because `cvlr` is an optional dependency enabled by that feature; the item it sits on is already gated on `unit_slashing`.",
+      "feature": "unit_slashing"
+    }
+  ]
+}

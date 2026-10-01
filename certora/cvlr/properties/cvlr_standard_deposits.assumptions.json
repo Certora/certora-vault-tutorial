@@ -1,0 +1,200 @@
+{
+  "rule_subjects": [
+    {
+      "subject": "program_function",
+      "rule": "rule_deposit_mints_shares_at_current_ratio",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_no_dilution_deposit",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_no_dilution_deposit_exact",
+      "function": "crate::processor::process_deposit_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_solvency_deposit",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_solvency_deposit_exact",
+      "function": "crate::processor::process_deposit_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_deposit_must_reject_self_transfer",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_cpi_token_effects_deposit",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_cpi_token_effects_deposit_exact",
+      "function": "crate::processor::process_deposit_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_cpi_arguments_deposit",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_cpi_arguments_deposit_exact",
+      "function": "crate::processor::process_deposit_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_backed_by_token_balance_deposit",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_backed_by_token_balance_deposit_exact",
+      "function": "crate::processor::process_deposit_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_backed_by_token_balance_self_transfer_deposit",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_exact_deposit_never_takes_more_than_requested",
+      "function": "crate::processor::process_deposit_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_nonzero_moves_deposit",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_nonzero_moves_deposit_exact",
+      "function": "crate::processor::process_deposit_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_config_unchanged_deposit",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_config_unchanged_deposit_exact",
+      "function": "crate::processor::process_deposit_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_reject_foreign_owned_vault",
+      "function": "crate::loaders::DepositContext::load"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_requires_authority_signature_deposit",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_requires_authority_signature_deposit_exact",
+      "function": "crate::processor::process_deposit_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_no_fee_bypass_deposit",
+      "function": "crate::operations::vault_deposit_assets"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_no_fee_bypass_deposit_exact",
+      "function": "crate::operations::vault_deposit_assets_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_legitimate_deposit_is_reachable",
+      "function": "crate::operations::vault_deposit_assets"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_legitimate_deposit_handler_path_live",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_deposit_not_dead_when_shares_zero",
+      "function": "crate::operations::vault_deposit_assets"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_deposit_exact_not_dead_when_shares_zero",
+      "function": "crate::operations::vault_deposit_assets_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_no_overcharge_deposit",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_no_overcharge_deposit_exact",
+      "function": "crate::processor::process_deposit_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_shares_match_mint_supply_deposit",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_shares_match_mint_supply_deposit_exact",
+      "function": "crate::processor::process_deposit_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_deposit_then_redeem_not_profitable",
+      "function": "crate::operations::vault_deposit_assets"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_deposit_exact_then_redeem_not_profitable",
+      "function": "crate::operations::vault_deposit_assets_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_stale_balance_pricing_deposit",
+      "function": "crate::processor::process_deposit"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_stale_balance_pricing_deposit_exact",
+      "function": "crate::processor::process_deposit_exact"
+    }
+  ],
+  "summaries": [],
+  "munges": [
+    {
+      "path": "programs/vault/src/processor/spl_token_utils.rs",
+      "function": "spl_transfer_assets_from_user",
+      "kind": {
+        "stand_in": "crate::certora::specs::standard_deposits::spl_transfer_assets_from_user"
+      },
+      "why": "Under `unit_standard_deposits` only, the real body \u2014 which builds an `spl_token::instruction::transfer` and `invoke`s it \u2014 is replaced by the author's stand-in of the same signature. What is dropped: the construction and serialization of the SPL Token instruction (the unbounded encoding loop that stops analysis at handler level) and the real cross-program invocation. Nothing is lost against the Prover's model of a CPI, which moves no token state anyway; the stand-in instead records the requested amount and the account keys and applies cvlr-solana's SPL token state-transition model, so the `vault_assets_account` `amount` field actually changes and the properties about token balances and about CPI amounts matching the recorded vault deltas become statable. Caveat the author should note: `mock_fn` replaces the definition, so every caller compiled in this unit's build uses the stand-in \u2014 that is `process_deposit` and `process_deposit_exact` (the targets) and also `process_deposit_with_fee` / `process_deposit_with_fee_exact`, which call this helper twice each. The sibling helpers in this file (`spl_burn_shares`, `spl_transfer_assets_from_vault`, `spl_token_account_amount`) are untouched and still build and invoke real instructions. Any property about what the real SPL Token program does on the callee side is not provable under this swap \u2014 only the vault's own accounting and the modelled token state are.",
+      "feature": "unit_standard_deposits"
+    },
+    {
+      "path": "programs/vault/src/processor/spl_token_utils.rs",
+      "function": "spl_mint_shares",
+      "kind": {
+        "stand_in": "crate::certora::specs::standard_deposits::spl_mint_shares"
+      },
+      "why": "Under `unit_standard_deposits` only, the real body \u2014 which builds an `spl_token::instruction::mint_to` and `invoke_signed`s it with the shares-mint PDA seeds \u2014 is replaced by the author's stand-in of the same signature. What is dropped: the instruction construction/serialization (the unbounded encoding loop), the real cross-program invocation, and any effect of the PDA signer seeds (`mint_signer_seeds` is still passed but the stand-in does not sign with it, so a property about *which* PDA signs the mint is not provable under this swap). Nothing is lost against the Prover's model of a CPI, which mints nothing; the stand-in records the requested amount and the account keys and applies cvlr-solana's SPL token state-transition model, so the `shares_mint` `supply` field actually changes and `vault_shares_equals_shares_mint_supply` plus the mint-amount-matches-vault-delta property become statable. Caveat: `mock_fn` replaces the definition, so in this unit's build every caller uses the stand-in \u2014 `process_deposit` and `process_deposit_exact` (the targets) and also the two fee-charging deposit handlers. `spl_burn_shares` is untouched, so the redemption side still builds and invokes a real instruction.",
+      "feature": "unit_standard_deposits"
+    }
+  ]
+}

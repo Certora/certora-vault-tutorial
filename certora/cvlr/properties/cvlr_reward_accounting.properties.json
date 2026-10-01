@@ -1,0 +1,57 @@
+[
+  {
+    "sort": "safety_property",
+    "description": "After a successful `process_update_reward`, `vault.assets` equals exactly the SPL token `amount` decoded from the `vault_assets_account` passed in (never more, never less), so the vault never records phantom assets that later redemptions or slashes could draw against.",
+    "title": "update_reward_syncs_assets_exactly_to_token_balance"
+  },
+  {
+    "sort": "safety_property",
+    "description": "If the token balance of `vault_assets_account` is strictly less than `vault.assets` at entry, `process_update_reward` must return an error and leave every field of the Vault account unchanged, rather than wrapping the subtraction into a huge reward or silently masking the shortfall.",
+    "title": "update_reward_rejects_balance_below_recorded_assets"
+  },
+  {
+    "sort": "safety_property",
+    "description": "`process_update_reward` never decreases `vault.assets` and never changes `vault.shares`, so the assets redeemable per outstanding share are non-decreasing across the call; otherwise a permissionless call could devalue existing holders' shares.",
+    "title": "update_reward_never_dilutes_existing_shares"
+  },
+  {
+    "sort": "safety_property",
+    "description": "`process_update_reward` leaves `admin`, `slash_admin`, `shares_mint`, `assets_mint`, `vault_assets_account`, `fee_token_account`, `vault_shares_mint_bump`, `vault_assets_account_bump`, `fee_bps` and `fee_amount` byte-identical, so this unsigned, permissionless instruction cannot rewrite the vault's authorities, mints or fee configuration.",
+    "title": "update_reward_leaves_vault_configuration_untouched"
+  },
+  {
+    "sort": "safety_property",
+    "description": "`process_update_reward` performs no cross-program invocation and writes to no account other than the Vault state account \u2014 in particular the data (balance) of `vault_assets_account` and the lamports of every passed account are unchanged \u2014 since recognizing a reward is a pure bookkeeping sync.",
+    "title": "update_reward_performs_no_cpi_and_moves_no_value"
+  },
+  {
+    "sort": "invariant",
+    "description": "The program-wide vault solvency invariant `vault.shares <= vault.assets` (the same one `del_token`/`check_invariant` enforces for redeem and slash) is preserved by `process_update_reward`: if it held on the Vault account at entry it holds at exit.",
+    "title": "update_reward_preserves_vault_solvency"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "`vault_update_reward` subtracts only `vault.assets` and ignores `vault.fee_amount`, even though `collect_fee` pays fees out of the same `vault_assets_account`; the property to check is that if `vault.assets + vault.fee_amount <= vault_assets_account.amount` held before the call it still holds after, since otherwise pending fees are recognized as reward and a later `collect_fee` transfer leaves the vault unable to honor redemptions.",
+    "title": "update_reward_counts_uncollected_fee_as_reward"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "`VaultInfo::try_from` performs no owner check (its only guard is `assets_mint != shares_mint`), so `process_update_reward` must fail unless `vault_info.owner == crate::ID`; otherwise a caller can supply a look-alike account they control whose `vault_assets_account` and `assets` fields they chose, making the handler read a balance of their choosing and operate on forged vault state.",
+    "title": "update_reward_requires_vault_account_owned_by_program"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "Unlike `DepositContext`/`SlashContext`, `UpdateRewardContext` never calls `VaultAssetsAccount::check_vault` and `spl_token_account_amount` unpacks the account data without checking its owner; `process_update_reward` must fail unless `vault_assets_account.key` equals `create_program_address([VAULT_ASSETS, vault_pk], vault.vault_assets_account_bump)` for this program and `vault_assets_account.owner` is the SPL Token program, since a forged token-account-shaped account yields an arbitrary balance and arbitrarily inflates `vault.assets`.",
+    "title": "update_reward_must_pin_asset_account_to_canonical_pda_and_token_program"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "If `vault.shares == 0` at entry, a successful `process_update_reward` must not leave `vault.assets > 0`: anyone can donate tokens to the vault asset account and call this permissionless handler, and in the resulting shares==0/assets>0 state every deposit converts to zero shares and reverts in `mint_shares` (which requires amount > 0) while no shares exist to redeem, permanently locking the assets and bricking the vault.",
+    "title": "update_reward_must_not_create_assets_with_zero_shares"
+  },
+  {
+    "sort": "safety_property",
+    "description": "Given a program-owned Vault account, its canonical asset token PDA holding a balance strictly greater than `vault.assets`, and no signer among the passed accounts, `process_update_reward` succeeds and increases `vault.assets` by exactly (balance - old assets), confirming the intended permissionless reward path is not dead.",
+    "title": "update_reward_reachable_without_any_signer"
+  }
+]

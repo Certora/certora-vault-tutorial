@@ -1,0 +1,72 @@
+{
+  "fee_is_exact_floor_bps_and_split_sums_to_amount": [
+    "rule_fee_is_exact_floor_bps_and_split_sums_to_amount"
+  ],
+  "fee_bps_cap_enforced_before_any_effect": [
+    "rule_fee_bps_cap_enforced_plain",
+    "rule_fee_bps_cap_enforced_exact"
+  ],
+  "vault_assets_increase_equals_net_transferred_in": [
+    "rule_vault_assets_increase_equals_net_transferred_in_plain",
+    "rule_vault_assets_increase_equals_net_transferred_in_exact"
+  ],
+  "vault_shares_increase_equals_shares_minted": [
+    "rule_vault_shares_increase_equals_shares_minted_plain",
+    "rule_vault_shares_increase_equals_shares_minted_exact"
+  ],
+  "fee_deposit_preserves_solvency": [
+    "rule_fee_deposit_preserves_solvency_plain",
+    "rule_fee_deposit_preserves_solvency_exact"
+  ],
+  "fee_deposit_does_not_dilute_existing_holders": [
+    "rule_fee_deposit_does_not_dilute_existing_holders_plain",
+    "rule_fee_deposit_does_not_dilute_existing_holders_exact"
+  ],
+  "fee_deposit_leaves_fee_amount_counter_unchanged": [
+    "rule_fee_deposit_leaves_fee_amount_counter_unchanged_plain",
+    "rule_fee_deposit_leaves_fee_amount_counter_unchanged_exact"
+  ],
+  "fee_deposit_leaves_vault_configuration_fields_unchanged": [
+    "rule_fee_deposit_leaves_vault_configuration_fields_unchanged_plain",
+    "rule_fee_deposit_leaves_vault_configuration_fields_unchanged_exact"
+  ],
+  "fee_deposit_rejects_vault_user_asset_account_aliasing": [
+    "rule_fee_deposit_rejects_aliasing_plain",
+    "rule_fee_deposit_rejects_aliasing_exact"
+  ],
+  "vault_info_owner_and_discriminator_unchecked": [
+    "rule_vault_info_owner_and_discriminator_unchecked"
+  ],
+  "fee_deposit_does_not_rederive_vault_pdas": [
+    "rule_fee_deposit_does_not_rederive_vault_assets_pda",
+    "rule_fee_deposit_does_not_rederive_shares_mint_pda"
+  ],
+  "no_user_assets_debited_without_positive_shares": [
+    "rule_no_user_assets_debited_without_positive_shares_plain",
+    "rule_no_user_assets_debited_without_positive_shares_exact"
+  ],
+  "exact_fee_deposit_never_over_collects_assets": [
+    "rule_exact_fee_deposit_never_over_collects_assets"
+  ],
+  "legitimate_fee_deposit_is_reachable": [
+    "rule_legitimate_fee_deposit_is_reachable"
+  ],
+  "fee_deposit_bricked_when_share_supply_is_zero": [
+    "rule_fee_deposit_bricked_when_share_supply_is_zero",
+    "rule_fee_deposit_bricked_when_share_supply_is_zero_witness"
+  ],
+  "exact_fee_deposit_is_a_refinement_of_plain_fee_deposit": [
+    "rule_exact_fee_deposit_is_a_refinement_of_plain_fee_deposit"
+  ],
+  "fee_deposit_shares_are_redeemable_without_profit": [
+    "rule_fee_deposit_shares_are_redeemable_without_profit_plain",
+    "rule_fee_deposit_shares_are_redeemable_without_profit_exact"
+  ],
+  "depositor_receives_full_value_for_net_deposit": [
+    "rule_depositor_receives_full_value_for_net_deposit_plain",
+    "rule_depositor_receives_full_value_for_net_deposit_exact"
+  ],
+  "exact_fee_never_exceeds_consented_bps_of_requested_amount": [
+    "rule_exact_fee_never_exceeds_consented_bps_of_requested_amount"
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "admin_signer_required_for_collect_fee": [
+    "rule_admin_signer_required_for_collect_fee"
+  ],
+  "collect_fee_transfers_exactly_recorded_fee": [
+    "rule_collect_fee_transfers_exactly_recorded_fee"
+  ],
+  "collect_fee_zeroes_fee_amount": [
+    "rule_collect_fee_zeroes_fee_amount"
+  ],
+  "collect_fee_preserves_assets_and_shares": [
+    "rule_collect_fee_preserves_assets_and_shares"
+  ],
+  "vault_config_fields_immutable": [
+    "rule_collect_fee_config_immutable",
+    "rule_vault_invariants_preserved_deposit",
+    "rule_vault_invariants_preserved_deposit_exact",
+    "rule_vault_invariants_preserved_deposit_with_fee",
+    "rule_vault_invariants_preserved_deposit_with_fee_exact",
+    "rule_vault_invariants_preserved_redeem_shares",
+    "rule_vault_invariants_preserved_update_reward",
+    "rule_vault_invariants_preserved_slash"
+  ],
+  "fee_amount_only_cleared_by_collect_fee": [
+    "rule_collect_fee_zeroes_fee_amount",
+    "rule_vault_invariants_preserved_deposit",
+    "rule_vault_invariants_preserved_deposit_exact",
+    "rule_vault_invariants_preserved_deposit_with_fee",
+    "rule_vault_invariants_preserved_deposit_with_fee_exact",
+    "rule_vault_invariants_preserved_redeem_shares",
+    "rule_vault_invariants_preserved_update_reward",
+    "rule_vault_invariants_preserved_slash"
+  ],
+  "collect_fee_must_not_spend_share_backing_assets": [
+    "rule_collect_fee_must_not_spend_share_backing_assets"
+  ],
+  "collect_fee_requires_program_owned_vault": [
+    "rule_collect_fee_requires_program_owned_vault"
+  ],
+  "collect_fee_requires_derived_vault_assets_pda": [
+    "rule_collect_fee_requires_derived_vault_assets_pda"
+  ],
+  "collect_fee_rejects_self_transfer": [
+    "rule_collect_fee_rejects_self_transfer"
+  ],
+  "collect_fee_reachable_for_admin": [
+    "rule_collect_fee_reachable_for_admin"
+  ]
+}

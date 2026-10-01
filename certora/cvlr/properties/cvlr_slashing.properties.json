@@ -1,0 +1,47 @@
+[
+  {
+    "sort": "safety_property",
+    "description": "process_slash must succeed only when the `authority` account is a transaction signer and its key equals the pre-state vault.slash_admin recorded in vault_info; for any other authority the instruction must fail with vault.assets unchanged and no asset transfer performed.",
+    "title": "slash_only_by_recorded_slash_admin_signer"
+  },
+  {
+    "sort": "safety_property",
+    "description": "On a successful process_slash, the vault's recorded assets decrease by exactly the `amount` argument (vault.assets_after == vault.assets_before - amount computed over exact integers, never wrapping) and the amount handed to the SPL Token transfer CPI equals exactly that same `amount`, so recorded assets can never diverge from the tokens actually moved out.",
+    "title": "slash_decrements_assets_by_exactly_amount"
+  },
+  {
+    "sort": "invariant",
+    "description": "If vault.shares <= vault.assets holds before the call, then after any successful process_slash vault.shares <= vault.assets still holds; equivalently process_slash must reject every `amount` greater than vault.assets - vault.shares (and every `amount` greater than vault.assets, with no underflow of the assets counter), since otherwise outstanding shares would no longer be fully backed and redeemers could not be paid. This solvency-preservation invariant should be instantiated for every handler that reduces vault.assets (process_slash here, and shared with redemption and fee collection).",
+    "title": "slash_preserves_vault_solvency"
+  },
+  {
+    "sort": "safety_property",
+    "description": "A successful process_slash must leave every Vault field other than `assets` byte-identical to its pre-state value \u2014 in particular shares, admin, slash_admin, shares_mint, assets_mint, fee_bps, fee_amount, fee_token_account, vault_assets_account, vault_assets_account_bump and vault_shares_mint_bump \u2014 so that the slash admin cannot use this instruction to escalate to vault admin, zero or inflate the fee counter, or re-point the vault's PDAs.",
+    "title": "slash_modifies_only_assets_field"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "vault_info is deserialized with bytemuck from a raw AccountInfo whose `owner` is never compared to the certora_vault program id (VaultInfo::validate only checks assets_mint != shares_mint), so process_slash must be shown to reject any vault_info account not owned by this program; otherwise an attacker supplies a look-alike account they created under another program with slash_admin set to their own key and passes the authority check.",
+    "title": "slash_vault_account_owner_unchecked"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "SlashContext only re-derives vault_assets_account from create_program_address([\"assets\", vault_info.key, vault.vault_assets_account_bump]) and never compares it to the vault.vault_assets_account pubkey stored in state (unlike DepositContext, which checks both); process_slash must require the passed vault_assets_account to equal vault.vault_assets_account as well as the seed-derived address, otherwise a vault whose stored bump is non-canonical or inconsistent with its stored account key lets a slash drain tokens from a PDA that is not the vault's recorded asset account while debiting this vault's recorded assets.",
+    "title": "slash_assets_account_must_match_recorded_pubkey"
+  },
+  {
+    "sort": "safety_property",
+    "description": "The asset transfer performed by process_slash must be a CPI to the canonical SPL Token program with vault_assets_account as both the source and the transfer authority, signed exclusively with the seeds [\"assets\", vault_info.key, vault.vault_assets_account_bump] taken from the validated vault state \u2014 never with a bump or seed supplied in instruction data \u2014 so the instruction can never make an unrelated vault's assets PDA sign, nor redirect the transfer to an attacker-controlled program.",
+    "title": "slash_cpi_uses_token_program_and_own_pda_seeds"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "The `assets_mint` account in SlashContext is never compared to vault.assets_mint (deposit and redeem contexts do compare it), so process_slash accepts an arbitrary mint account in that position; a correct implementation should reject assets_mint != vault.assets_mint, since any logic that later relies on this slot identifying the vault's asset mint (e.g. decimals-aware transfer_checked) would operate on an unrelated mint.",
+    "title": "slash_assets_mint_not_bound_to_vault"
+  },
+  {
+    "sort": "safety_property",
+    "description": "A well-formed slash must actually be executable: with vault_info owned by the program and internally consistent, vault_assets_account equal to the recorded/derived assets PDA, the canonical SPL Token program passed, the signing authority equal to vault.slash_admin, and 0 < amount <= vault.assets - vault.shares, process_slash must succeed rather than revert, ensuring the guards are not so strict that the slashing path is unreachable.",
+    "title": "slash_reachable_for_legitimate_admin"
+  }
+]

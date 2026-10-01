@@ -1,0 +1,36 @@
+{
+  "update_reward_syncs_assets_exactly_to_token_balance": [
+    "rule_update_reward_syncs_assets_to_balance"
+  ],
+  "update_reward_rejects_balance_below_recorded_assets": [
+    "rule_update_reward_rejects_balance_below_assets"
+  ],
+  "update_reward_never_dilutes_existing_shares": [
+    "rule_update_reward_never_dilutes_shares"
+  ],
+  "update_reward_leaves_vault_configuration_untouched": [
+    "rule_update_reward_config_untouched"
+  ],
+  "update_reward_performs_no_cpi_and_moves_no_value": [
+    "rule_update_reward_moves_no_value"
+  ],
+  "update_reward_preserves_vault_solvency": [
+    "rule_update_reward_preserves_solvency"
+  ],
+  "update_reward_counts_uncollected_fee_as_reward": [
+    "rule_update_reward_preserves_fee_backing"
+  ],
+  "update_reward_requires_vault_account_owned_by_program": [
+    "rule_update_reward_rejects_foreign_owned_vault"
+  ],
+  "update_reward_must_pin_asset_account_to_canonical_pda_and_token_program": [
+    "rule_update_reward_rejects_foreign_owned_assets_account",
+    "rule_update_reward_rejects_non_canonical_assets_account"
+  ],
+  "update_reward_must_not_create_assets_with_zero_shares": [
+    "rule_update_reward_no_assets_with_zero_shares"
+  ],
+  "update_reward_reachable_without_any_signer": [
+    "rule_update_reward_reachable_without_signer"
+  ]
+}

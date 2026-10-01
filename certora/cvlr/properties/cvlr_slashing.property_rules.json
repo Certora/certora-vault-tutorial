@@ -1,0 +1,32 @@
+{
+  "slash_only_by_recorded_slash_admin_signer": [
+    "rule_slash_only_by_recorded_slash_admin_signer",
+    "rule_slash_rejects_unsigned_authority",
+    "rule_slash_rejects_wrong_authority_key"
+  ],
+  "slash_decrements_assets_by_exactly_amount": [
+    "rule_slash_decrements_assets_by_exactly_amount"
+  ],
+  "slash_preserves_vault_solvency": [
+    "rule_slash_preserves_vault_solvency"
+  ],
+  "slash_modifies_only_assets_field": [
+    "rule_slash_modifies_only_assets_field"
+  ],
+  "slash_vault_account_owner_unchecked": [
+    "rule_slash_requires_vault_info_owned_by_program"
+  ],
+  "slash_assets_account_must_match_recorded_pubkey": [
+    "rule_slash_assets_account_matches_recorded_pubkey"
+  ],
+  "slash_cpi_uses_token_program_and_own_pda_seeds": [
+    "rule_slash_cpi_uses_token_program_and_own_pda_seeds",
+    "rule_slash_transfer_ix_builder"
+  ],
+  "slash_assets_mint_not_bound_to_vault": [
+    "rule_slash_assets_mint_matches_vault_record"
+  ],
+  "slash_reachable_for_legitimate_admin": [
+    "rule_slash_accounting_accepts_legitimate_amount"
+  ]
+}

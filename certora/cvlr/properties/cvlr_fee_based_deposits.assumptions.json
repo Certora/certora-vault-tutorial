@@ -1,0 +1,226 @@
+{
+  "rule_subjects": [
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_is_exact_floor_bps_and_split_sums_to_amount",
+      "function": "crate::operations::vault_deposit_assets_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_bps_cap_enforced_plain",
+      "function": "crate::operations::vault_deposit_assets_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_bps_cap_enforced_exact",
+      "function": "crate::operations::vault_deposit_assets_with_fee_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_vault_assets_increase_equals_net_transferred_in_plain",
+      "function": "crate::operations::vault_deposit_assets_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_vault_assets_increase_equals_net_transferred_in_exact",
+      "function": "crate::operations::vault_deposit_assets_with_fee_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_vault_shares_increase_equals_shares_minted_plain",
+      "function": "crate::operations::vault_deposit_assets_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_vault_shares_increase_equals_shares_minted_exact",
+      "function": "crate::operations::vault_deposit_assets_with_fee_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_preserves_solvency_plain",
+      "function": "crate::operations::vault_deposit_assets_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_preserves_solvency_exact",
+      "function": "crate::operations::vault_deposit_assets_with_fee_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_does_not_dilute_existing_holders_plain",
+      "function": "crate::operations::vault_deposit_assets_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_does_not_dilute_existing_holders_exact",
+      "function": "crate::operations::vault_deposit_assets_with_fee_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_leaves_fee_amount_counter_unchanged_plain",
+      "function": "crate::operations::vault_deposit_assets_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_leaves_fee_amount_counter_unchanged_exact",
+      "function": "crate::operations::vault_deposit_assets_with_fee_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_leaves_vault_configuration_fields_unchanged_plain",
+      "function": "crate::operations::vault_deposit_assets_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_leaves_vault_configuration_fields_unchanged_exact",
+      "function": "crate::operations::vault_deposit_assets_with_fee_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_rejects_aliasing_plain",
+      "function": "crate::processor::deposit_with_fee_load_and_guard"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_rejects_aliasing_exact",
+      "function": "crate::processor::deposit_with_fee_exact_load_and_guard"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_vault_info_owner_and_discriminator_unchecked",
+      "function": "crate::loaders::DepositWithFeeContext::load"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_does_not_rederive_vault_assets_pda",
+      "function": "crate::loaders::DepositWithFeeContext::load"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_does_not_rederive_shares_mint_pda",
+      "function": "crate::loaders::DepositWithFeeContext::load"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_no_user_assets_debited_without_positive_shares_plain",
+      "function": "crate::operations::vault_deposit_assets_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_no_user_assets_debited_without_positive_shares_exact",
+      "function": "crate::operations::vault_deposit_assets_with_fee_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_exact_fee_deposit_never_over_collects_assets",
+      "function": "crate::operations::vault_deposit_assets_with_fee_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_legitimate_fee_deposit_is_reachable",
+      "function": "crate::loaders::DepositWithFeeContext::load"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_bricked_when_share_supply_is_zero",
+      "function": "crate::operations::vault_deposit_assets_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_bricked_when_share_supply_is_zero_witness",
+      "function": "crate::operations::vault_deposit_assets_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_exact_fee_deposit_is_a_refinement_of_plain_fee_deposit",
+      "function": "crate::operations::vault_deposit_assets_with_fee_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_shares_are_redeemable_without_profit_plain",
+      "function": "crate::operations::vault_deposit_assets_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_fee_deposit_shares_are_redeemable_without_profit_exact",
+      "function": "crate::operations::vault_deposit_assets_with_fee_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_depositor_receives_full_value_for_net_deposit_plain",
+      "function": "crate::operations::vault_deposit_assets_with_fee"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_depositor_receives_full_value_for_net_deposit_exact",
+      "function": "crate::operations::vault_deposit_assets_with_fee_exact"
+    },
+    {
+      "subject": "program_function",
+      "rule": "rule_exact_fee_never_exceeds_consented_bps_of_requested_amount",
+      "function": "crate::operations::vault_deposit_assets_with_fee_exact"
+    }
+  ],
+  "summaries": [
+    {
+      "pattern": "^certora_vault::processor::spl_token_utils::spl_transfer_assets_from_user$",
+      "why": "Four handler-level rules (rule_fee_bps_cap_enforced_handler_plain/_exact, rule_fee_deposit_rejects_aliasing_plain/_exact) came back TIMEOUT. Each of them asserts that the handler ABORTS before reaching any CPI \u2014 either because the stored fee_bps exceeds the 10000 cap (the accounting core returns Err, propagated with `?` before the first transfer) or because the self-transfer guard `require_ne!(vault_assets_account.key, user_assets_account.key)` fires immediately after `DepositWithFeeContext::load`. The SPL transfer wrapper is therefore on dead code for every one of those rules, yet the Prover still encodes it: it builds an spl_token `Instruction` (heap Vec of AccountMeta plus a packed data buffer) and then performs `invoke`, which is what makes the queries intractable. Replacing it with an unconstrained stand-in is sound for these properties because no rule in this batch reads anything it computes or writes: CPI effects (token balances) are not modelled by the Prover at all, so no property here asserts over them, and all vault-state assertions are made over `crate::state::Vault`, which this function never touches.",
+      "returns": null
+    },
+    {
+      "pattern": "^certora_vault::processor::spl_token_utils::spl_mint_shares$",
+      "why": "Same cause and same justification as the transfer wrapper: the four handler-level rules all assert that the handler returns Err before any CPI is issued, so the `mint_to` wrapper is unreachable on every path they constrain, but the Prover still encodes its spl_token Instruction construction and `invoke_signed`, which is a large part of why those rules timed out. No property in this batch asserts over anything this function computes or writes \u2014 share-mint amounts are asserted over `VaultEffect::shares_to_user` returned by the accounting core, which is computed before this call.",
+      "returns": null
+    },
+    {
+      "pattern": "^spl_token::instruction::transfer$",
+      "why": "Backstop for the same four timing-out handler rules in case the program's own `spl_transfer_assets_from_user` wrapper is inlined into the handlers and so has no symbol to match. This is the spl-token library's instruction builder: it allocates a Vec of AccountMeta and a packed data buffer. It is reached only from code the four rules prove unreachable (the handler aborts before the first transfer), and no property in this batch asserts over an Instruction value.",
+      "returns": null
+    },
+    {
+      "pattern": "^spl_token::instruction::mint_to$",
+      "why": "Backstop for the same four timing-out handler rules in case the program's own `spl_mint_shares` wrapper is inlined. The spl-token library's `mint_to` instruction builder allocates a Vec of AccountMeta and a packed data buffer; it is reached only from code the four rules prove unreachable, and no property in this batch asserts over an Instruction value.",
+      "returns": null
+    }
+  ],
+  "munges": [
+    {
+      "path": "programs/vault/src/processor/spl_token_utils.rs",
+      "function": "spl_transfer_assets_from_user",
+      "kind": {
+        "stand_in": "crate::certora::specs::fee_based_deposits::spl_transfer_assets_from_user"
+      },
+      "why": "Under `unit_fee_based_deposits` only, this SPL-transfer CPI wrapper is replaced by the author's inert stand-in, which returns `Ok(())` and does nothing else. The real body builds an `spl_token::instruction::transfer` instruction (heap `Vec<AccountMeta>` plus packed data) and calls `invoke` with a 4-element account array; the compiler inlines it bodily into `process_deposit_with_fee` and `process_deposit_with_fee_exact`, so there is no symbol left for a prover summary directive to name, and its encoding dominates the four handler-level rules even though they return before the call. What is dropped is the construction of the token instruction and the cross-program invocation itself \u2014 i.e. nothing the Prover models anyway (it does not model CPI effects), plus the possibility that `spl_token::instruction::transfer` returns an error. The handlers' own loader, `require_ne!` self-transfer guard and accounting core are untouched, and those are what the four rules assert on; the amounts the rules talk about come from the `VaultEffect` returned before any of these calls. A property about token balances actually moved would be false under this stand-in, and the author states no rule in this batch makes one. The same stand-in also applies to the other call sites of this function reached under this feature (both transfer calls in each of the two handlers, and `deposit.rs` / `deposit_exact.rs` if a rule of this unit drives them).",
+      "feature": "unit_fee_based_deposits"
+    },
+    {
+      "path": "programs/vault/src/processor/spl_token_utils.rs",
+      "function": "spl_mint_shares",
+      "kind": {
+        "stand_in": "crate::certora::specs::fee_based_deposits::spl_mint_shares"
+      },
+      "why": "Under `unit_fee_based_deposits` only, this SPL-mint CPI wrapper is replaced by the author's inert stand-in, which returns `Ok(())` and does nothing else. The real body builds an `spl_token::instruction::mint_to` instruction (heap `Vec<AccountMeta>` plus packed data) and calls `invoke_signed` with a 3-element account array; the compiler inlines it bodily into `process_deposit_with_fee` and `process_deposit_with_fee_exact`, so a summary directive has no symbol to name, and its encoding dominates the four handler-level rules even though they abort before reaching it. What is dropped is the instruction construction, the signed cross-program invocation, and the error path of `spl_token::instruction::mint_to` \u2014 none of which the Prover models as an effect. The handlers' guards and accounting (including the `vault_info.get()?` bump read that precedes the call) are unchanged, and the minted amount the rules reason about is the `VaultEffect::shares_to_user` produced before the call. A property about shares actually minted into the user's token account would be false under this stand-in; the author states no rule in this batch asserts over it.",
+      "feature": "unit_fee_based_deposits"
+    },
+    {
+      "path": "programs/vault/src/processor/deposit_with_fee.rs",
+      "function": "process_deposit_with_fee",
+      "extracted_name": "deposit_with_fee_load_and_guard",
+      "original": "pub fn process_deposit_with_fee(accounts: &[AccountInfo], amount: u64) -> ProgramResult {\n    let DepositWithFeeContext {\n        vault_info,\n        vault_assets_account,\n        vault_fee_account,\n        assets_mint,\n        shares_mint,\n        user_assets_account,\n        authority,\n        user_shares_account,\n        spl_token_program,\n    } = DepositWithFeeContext::load(accounts)?;\n\n    require_ne!(\n        vault_assets_account.key,\n        user_assets_account.key,\n        crate::errors::VaultError::SelfTransfer.into()\n    );\n\n    let effect = {\n        let mut vault = vault_info.get_mut()?;\n        vault_deposit_assets_with_fee(&mut vault, amount)\n            .map_err(|e| -> ProgramError { e.into() })?\n    };\n\n    // -- transfer assets into vault\n    spl_transfer_assets_from_user(\n        effect.assets_to_vault,\n        &vault_assets_account,\n        &user_assets_account,\n        &assets_mint,\n        authority.as_ref(),\n        spl_token_program.as_ref(),\n    )?;\n\n    // -- transfer fee from user to vault\n    spl_transfer_assets_from_user(\n        effect.assets_to_fee,\n        &vault_fee_account,\n        &user_assets_account,\n        &assets_mint,\n        authority.as_ref(),\n        spl_token_program.as_ref(),\n    )?;\n\n    let shares_mint_bump = vault_info.get()?.vault_shares_mint_bump;\n    spl_mint_shares(\n        effect.shares_to_user,\n        &user_shares_account,\n        &shares_mint,\n        spl_token_program.as_ref(),\n        crate::vault_shares_mint_seeds_with_bump!(vault_info.as_ref().key, shares_mint_bump),\n    )?;\n\n    Ok(())\n}",
+      "replacement": "pub fn process_deposit_with_fee(accounts: &[AccountInfo], amount: u64) -> ProgramResult {\n    let DepositWithFeeContext {\n        vault_info,\n        vault_assets_account,\n        vault_fee_account,\n        assets_mint,\n        shares_mint,\n        user_assets_account,\n        authority,\n        user_shares_account,\n        spl_token_program,\n    } = deposit_with_fee_load_and_guard(accounts)?;\n\n    let effect = {\n        let mut vault = vault_info.get_mut()?;\n        vault_deposit_assets_with_fee(&mut vault, amount)\n            .map_err(|e| -> ProgramError { e.into() })?\n    };\n\n    // -- transfer assets into vault\n    spl_transfer_assets_from_user(\n        effect.assets_to_vault,\n        &vault_assets_account,\n        &user_assets_account,\n        &assets_mint,\n        authority.as_ref(),\n        spl_token_program.as_ref(),\n    )?;\n\n    // -- transfer fee from user to vault\n    spl_transfer_assets_from_user(\n        effect.assets_to_fee,\n        &vault_fee_account,\n        &user_assets_account,\n        &assets_mint,\n        authority.as_ref(),\n        spl_token_program.as_ref(),\n    )?;\n\n    let shares_mint_bump = vault_info.get()?.vault_shares_mint_bump;\n    spl_mint_shares(\n        effect.shares_to_user,\n        &user_shares_account,\n        &shares_mint,\n        spl_token_program.as_ref(),\n        crate::vault_shares_mint_seeds_with_bump!(vault_info.as_ref().key, shares_mint_bump),\n    )?;\n\n    Ok(())\n}",
+      "extracted": "pub fn deposit_with_fee_load_and_guard<'info>(\n    accounts: &[AccountInfo<'info>],\n) -> Result<DepositWithFeeContext<'info>, ProgramError> {\n    let ctx = DepositWithFeeContext::load(accounts)?;\n\n    require_ne!(\n        ctx.vault_assets_account.key,\n        ctx.user_assets_account.key,\n        crate::errors::VaultError::SelfTransfer.into()\n    );\n\n    Ok(ctx)\n}",
+      "why": "Property 9 of this batch is entirely about the self-transfer guard that sits between `DepositWithFeeContext::load(accounts)?` and the rest of the handler, and there was no function boundary there for a rule to drive. The split moves exactly that prefix \u2014 the `load` call and the `require_ne!` on `vault_assets_account.key` vs `user_assets_account.key` \u2014 into `deposit_with_fee_load_and_guard`, which returns the loaded context on success and the same `VaultError::SelfTransfer` `ProgramError` on failure. Behaviour-preserving: `process_deposit_with_fee` now calls the extracted function and destructures its `Ok` context into the identical bindings, so the load, the guard, the error value and every subsequent statement are unchanged and in the same order; the `?` propagates the guard's error exactly as the macro's `return Err(..)` did. The guard reads the fields through `ctx.` rather than through the destructured locals, which is the same `&Pubkey` comparison. The extracted function is `pub` in `crate::processor::deposit_with_fee`, a public module also glob-re-exported from `crate::processor`, so the harness can name it.",
+      "feature": "unit_fee_based_deposits"
+    },
+    {
+      "path": "programs/vault/src/processor/deposit_with_fee_exact.rs",
+      "function": "process_deposit_with_fee_exact",
+      "extracted_name": "deposit_with_fee_exact_load_and_guard",
+      "original": "pub fn process_deposit_with_fee_exact(accounts: &[AccountInfo], amount: u64) -> ProgramResult {\n    let DepositWithFeeContext {\n        vault_info,\n        vault_assets_account,\n        vault_fee_account,\n        assets_mint,\n        shares_mint,\n        user_assets_account,\n        authority,\n        user_shares_account,\n        spl_token_program,\n    } = DepositWithFeeContext::load(accounts)?;\n\n    require_ne!(\n        vault_assets_account.key,\n        user_assets_account.key,\n        crate::errors::VaultError::SelfTransfer.into()\n    );\n\n    let effect = {\n        let mut vault = vault_info.get_mut()?;\n        vault_deposit_assets_with_fee_exact(&mut vault, amount)\n            .map_err(|e| -> ProgramError { e.into() })?\n    };\n\n    // -- transfer assets into vault\n    spl_transfer_assets_from_user(\n        effect.assets_to_vault,\n        &vault_assets_account,\n        &user_assets_account,\n        &assets_mint,\n        authority.as_ref(),\n        spl_token_program.as_ref(),\n    )?;\n\n    // -- transfer fee from user to vault\n    spl_transfer_assets_from_user(\n        effect.assets_to_fee,\n        &vault_fee_account,\n        &user_assets_account,\n        &assets_mint,\n        authority.as_ref(),\n        spl_token_program.as_ref(),\n    )?;\n\n    let shares_mint_bump = vault_info.get()?.vault_shares_mint_bump;\n    spl_mint_shares(\n        effect.shares_to_user,\n        &user_shares_account,\n        &shares_mint,\n        spl_token_program.as_ref(),\n        crate::vault_shares_mint_seeds_with_bump!(vault_info.as_ref().key, shares_mint_bump),\n    )?;\n\n    Ok(())\n}",
+      "replacement": "pub fn process_deposit_with_fee_exact(accounts: &[AccountInfo], amount: u64) -> ProgramResult {\n    let DepositWithFeeContext {\n        vault_info,\n        vault_assets_account,\n        vault_fee_account,\n        assets_mint,\n        shares_mint,\n        user_assets_account,\n        authority,\n        user_shares_account,\n        spl_token_program,\n    } = deposit_with_fee_exact_load_and_guard(accounts)?;\n\n    let effect = {\n        let mut vault = vault_info.get_mut()?;\n        vault_deposit_assets_with_fee_exact(&mut vault, amount)\n            .map_err(|e| -> ProgramError { e.into() })?\n    };\n\n    // -- transfer assets into vault\n    spl_transfer_assets_from_user(\n        effect.assets_to_vault,\n        &vault_assets_account,\n        &user_assets_account,\n        &assets_mint,\n        authority.as_ref(),\n        spl_token_program.as_ref(),\n    )?;\n\n    // -- transfer fee from user to vault\n    spl_transfer_assets_from_user(\n        effect.assets_to_fee,\n        &vault_fee_account,\n        &user_assets_account,\n        &assets_mint,\n        authority.as_ref(),\n        spl_token_program.as_ref(),\n    )?;\n\n    let shares_mint_bump = vault_info.get()?.vault_shares_mint_bump;\n    spl_mint_shares(\n        effect.shares_to_user,\n        &user_shares_account,\n        &shares_mint,\n        spl_token_program.as_ref(),\n        crate::vault_shares_mint_seeds_with_bump!(vault_info.as_ref().key, shares_mint_bump),\n    )?;\n\n    Ok(())\n}",
+      "extracted": "pub fn deposit_with_fee_exact_load_and_guard<'info>(\n    accounts: &[AccountInfo<'info>],\n) -> Result<DepositWithFeeContext<'info>, ProgramError> {\n    let ctx = DepositWithFeeContext::load(accounts)?;\n\n    require_ne!(\n        ctx.vault_assets_account.key,\n        ctx.user_assets_account.key,\n        crate::errors::VaultError::SelfTransfer.into()\n    );\n\n    Ok(ctx)\n}",
+      "why": "Same property, the `_exact` handler. The self-transfer guard sits between `DepositWithFeeContext::load(accounts)?` and the accounting core, with no boundary for a rule to drive. The split moves exactly that prefix into `deposit_with_fee_exact_load_and_guard`, returning the loaded context on success and the same `VaultError::SelfTransfer` `ProgramError` on failure. Behaviour-preserving: `process_deposit_with_fee_exact` calls the extracted function and destructures its `Ok` context into the identical bindings, leaving the load, the guard, the error value and every following statement unchanged and in order; the `?` propagates the guard's error exactly as the macro's `return Err(..)` did. It is given a distinct name from its sibling in `deposit_with_fee.rs` because `crate::processor` glob-re-exports both modules. The extracted function is `pub` in the public module `crate::processor::deposit_with_fee_exact`, so the harness can name it.",
+      "feature": "unit_fee_based_deposits"
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+[
+  {
+    "sort": "safety_property",
+    "description": "For `process_deposit`, on success the shares minted must equal `amount` when vault.shares == vault.assets before the call and floor(amount * shares_before / assets_before) otherwise, with vault.shares increased by exactly that number and vault.assets increased by exactly `amount`; any other value means shares are mispriced against the vault's current share/asset ratio.",
+    "title": "deposit_mints_shares_at_current_ratio"
+  },
+  {
+    "sort": "safety_property",
+    "description": "For both `process_deposit` and `process_deposit_exact`, the assets backing each pre-existing share must not decrease \u2014 assets_after * shares_before >= assets_before * shares_after \u2014 otherwise a depositor pays less than the fair backing for the shares they receive and silently extracts value from existing holders (note `process_deposit_exact` recomputes assets with the floor-rounding `convert_shares_to_assets` rather than `convert_shares_to_assets_ceil`).",
+    "title": "deposit_never_dilutes_existing_shareholders"
+  },
+  {
+    "sort": "invariant",
+    "description": "If vault.shares <= vault.assets holds before `process_deposit` or `process_deposit_exact`, it must still hold after the handler returns successfully; violating it means the vault records more outstanding shares than assets to back them and later redeemers cannot be paid.",
+    "title": "deposits_preserve_vault_solvency"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "`process_deposit` must revert when `user_assets_account` is the same account as `vault_assets_account` (the guard is present but commented out, while `process_deposit_exact` enforces it): with a self-transfer the token CPI moves no tokens, yet vault.assets and vault.shares are both increased, so the caller mints shares backed by assets that never entered the vault.",
+    "title": "deposit_must_reject_self_transfer"
+  },
+  {
+    "sort": "safety_property",
+    "description": "In `process_deposit` and `process_deposit_exact`, the asset amount requested in the SPL transfer CPI (source `user_assets_account`, destination `vault_assets_account`, authority = the signing `authority`) must equal the increase in vault.assets, and the amount in the `mint_to` CPI (mint = vault.shares_mint, destination `user_shares_account`) must equal the increase in vault.shares; a mismatch makes the vault's ledger diverge from the real token balances.",
+    "title": "deposit_cpi_amounts_match_recorded_state_deltas"
+  },
+  {
+    "sort": "invariant",
+    "description": "If, before `process_deposit` or `process_deposit_exact`, vault.assets + vault.fee_amount <= the `amount` field of the SPL token account data of `vault_assets_account`, the same relation must hold afterwards; breaking it means the vault credits itself assets it does not hold, which no later instruction can reconcile downward (update_reward only syncs upward).",
+    "title": "recorded_assets_remain_backed_by_token_balance"
+  },
+  {
+    "sort": "safety_property",
+    "description": "`process_deposit_exact` must never transfer more asset tokens out of `user_assets_account` than the `amount` instruction argument (assets_to_vault <= amount), since the whole point of the exact variant is to take only what is needed to back the minted shares; taking more pulls unauthorized tokens from the depositor.",
+    "title": "exact_deposit_never_takes_more_than_requested"
+  },
+  {
+    "sort": "safety_property",
+    "description": "`process_deposit` and `process_deposit_exact` must fail unless both the number of shares minted and the number of assets added to the vault are strictly positive, so that a caller can neither surrender assets for zero shares nor obtain shares without contributing assets.",
+    "title": "deposit_rejects_zero_share_or_zero_asset_move"
+  },
+  {
+    "sort": "invariant",
+    "description": "`process_deposit` and `process_deposit_exact` must leave every Vault field other than `shares` and `assets` byte-identical \u2014 admin, slash_admin, shares_mint, assets_mint, vault_assets_account, vault_shares_mint_bump, vault_assets_account_bump, fee_bps, fee_amount and fee_token_account \u2014 since the vault is written through a zero-copy bytemuck cast and a wrong write would silently reassign authorities or PDAs.",
+    "title": "deposit_leaves_vault_configuration_unchanged"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "`process_deposit` and `process_deposit_exact` must reject a `vault_info` account whose owner is not the vault program (and whose data is not a valid, initialized Vault): `VaultInfo::try_from` only reinterprets the raw bytes with `bytemuck::from_bytes` and checks assets_mint != shares_mint, so an attacker can supply a look-alike account they control with an arbitrary shares/assets ratio and arbitrary recorded mint/token-account keys to drive share minting.",
+    "title": "deposit_must_reject_foreign_owned_vault_account"
+  },
+  {
+    "sort": "safety_property",
+    "description": "`process_deposit` and `process_deposit_exact` must revert if the `authority` account is not a signer, since that account is used as the transfer authority over `user_assets_account`; without the check the program becomes a confused deputy that moves a third party's asset tokens.",
+    "title": "deposit_requires_authority_signature"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "When vault.fee_bps != 0, the fee-free variants `process_deposit` and `process_deposit_exact` should not succeed (the `require!(fee.is_zero())` check exists but is commented out in `vault_deposit_assets`); otherwise any depositor can simply call the standard deposit instruction instead of the fee-charging one and the protocol never collects the configured fee.",
+    "title": "standard_deposit_must_not_bypass_configured_fee"
+  },
+  {
+    "sort": "safety_property",
+    "description": "`process_deposit` must be able to complete successfully for a well-formed call \u2014 distinct `user_assets_account` and `vault_assets_account`, a signing `authority`, the correct vault-derived `vault_assets_account`/`shares_mint` PDAs, a solvent vault and an `amount` large enough to yield a nonzero share count \u2014 so that the accumulated guards do not render the deposit path dead.",
+    "title": "legitimate_deposit_is_reachable"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "From a vault state where shares == 0 and assets > 0 (reachable by donating tokens plus `update_reward`, or by full redemption after reward accrual), `process_deposit` and `process_deposit_exact` compute floor(amount * 0 / assets) = 0 shares for every `amount` and then fail in `mint_shares`, permanently bricking deposits and leaving the residual assets unredeemable; a correct implementation should fall back to a 1:1 (or other well-defined) bootstrap ratio in that state.",
+    "title": "deposit_dead_when_shares_zero_but_assets_positive"
+  },
+  {
+    "sort": "safety_property",
+    "description": "For `process_deposit` and `process_deposit_exact`, the assets taken from the depositor (the increase in vault.assets, equal to the amount in the SPL transfer CPI) must not exceed the pre-state value of the shares minted rounded up \u2014 assets_delta * shares_before <= shares_minted * assets_before when shares_before != assets_before (rounding the right-hand side up), and assets_delta <= shares_minted when shares_before == assets_before \u2014 otherwise the depositor surrenders assets that the shares they receive do not entitle them to reclaim, and that value is silently donated to pre-existing shareholders; this is exactly the inflation-attack loss the 'exact' variant is meant to remove, and `process_deposit` takes the full `amount` regardless of how far floor(amount * shares_before / assets_before) truncates.",
+    "title": "deposit_never_overcharges_depositor_for_shares"
+  },
+  {
+    "sort": "invariant",
+    "description": "If, before `process_deposit` or `process_deposit_exact`, vault.shares equals the `supply` field of the `shares_mint` account, the equality must still hold after the handler returns successfully (checking this requires a model of the SPL Token mint_to CPI, the same modelling assumption the assets-side backing property already makes; the bound here is a single mint account): if vault.shares falls below the circulating share supply the vault will not honour every outstanding share token and the last redeemers cannot be paid, and if it rises above the supply the vault reserves assets against shares nobody holds, stranding them permanently.",
+    "title": "vault_shares_equals_shares_mint_supply"
+  },
+  {
+    "sort": "safety_property",
+    "description": "Spanning a sequence of two transactions: a `process_deposit` (or `process_deposit_exact`) that mints S shares and takes A assets, followed immediately by a `process_redeem_shares` of exactly those S shares on the same vault with no instruction in between, must return at most A assets to the user; if it can return more, the floor/ceil asymmetry between `convert_assets_to_shares` and `convert_shares_to_assets` lets anyone repeatedly cycle deposit-and-redeem to extract assets from the vault with no capital at risk, draining existing shareholders.",
+    "title": "deposit_then_redeem_is_not_profitable"
+  },
+  {
+    "sort": "attack_vector",
+    "description": "For `process_deposit` and `process_deposit_exact`, when the `vault_assets_account` SPL token account holds strictly more tokens than `vault.assets + vault.fee_amount` before the call (an accrued reward or plain donation that the permissionless `process_update_reward` has not yet recognized), the handler prices shares off the stale recorded `vault.assets` and mints floor(amount * shares / assets_recorded) shares instead of the fair floor(amount * shares / real_balance), handing the new depositor a pro-rata claim on the unrecognized tokens; the rule to check is that after either handler succeeds, token_balance_after * shares_before >= token_balance_before * shares_after, where token_balance is the `amount` field of the `vault_assets_account` token account, and a violation means existing shareholders' claim on the vault's real holdings is diluted by the incoming depositor (this reuses the SPL-token-account model that the existing backing property already assumes; the bound is one token account).",
+    "title": "deposit_prices_shares_against_stale_asset_balance"
+  }
+]

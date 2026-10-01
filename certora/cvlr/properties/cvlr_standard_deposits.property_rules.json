@@ -1,0 +1,73 @@
+{
+  "deposit_mints_shares_at_current_ratio": [
+    "rule_deposit_mints_shares_at_current_ratio"
+  ],
+  "deposit_never_dilutes_existing_shareholders": [
+    "rule_no_dilution_deposit",
+    "rule_no_dilution_deposit_exact"
+  ],
+  "deposits_preserve_vault_solvency": [
+    "rule_solvency_deposit",
+    "rule_solvency_deposit_exact"
+  ],
+  "deposit_must_reject_self_transfer": [
+    "rule_deposit_must_reject_self_transfer"
+  ],
+  "deposit_cpi_amounts_match_recorded_state_deltas": [
+    "rule_cpi_token_effects_deposit",
+    "rule_cpi_token_effects_deposit_exact",
+    "rule_cpi_arguments_deposit",
+    "rule_cpi_arguments_deposit_exact"
+  ],
+  "recorded_assets_remain_backed_by_token_balance": [
+    "rule_backed_by_token_balance_deposit",
+    "rule_backed_by_token_balance_deposit_exact",
+    "rule_backed_by_token_balance_self_transfer_deposit"
+  ],
+  "exact_deposit_never_takes_more_than_requested": [
+    "rule_exact_deposit_never_takes_more_than_requested"
+  ],
+  "deposit_rejects_zero_share_or_zero_asset_move": [
+    "rule_nonzero_moves_deposit",
+    "rule_nonzero_moves_deposit_exact"
+  ],
+  "deposit_leaves_vault_configuration_unchanged": [
+    "rule_config_unchanged_deposit",
+    "rule_config_unchanged_deposit_exact"
+  ],
+  "deposit_must_reject_foreign_owned_vault_account": [
+    "rule_reject_foreign_owned_vault"
+  ],
+  "deposit_requires_authority_signature": [
+    "rule_requires_authority_signature_deposit",
+    "rule_requires_authority_signature_deposit_exact"
+  ],
+  "standard_deposit_must_not_bypass_configured_fee": [
+    "rule_no_fee_bypass_deposit",
+    "rule_no_fee_bypass_deposit_exact"
+  ],
+  "legitimate_deposit_is_reachable": [
+    "rule_legitimate_deposit_is_reachable",
+    "rule_legitimate_deposit_handler_path_live"
+  ],
+  "deposit_dead_when_shares_zero_but_assets_positive": [
+    "rule_deposit_not_dead_when_shares_zero",
+    "rule_deposit_exact_not_dead_when_shares_zero"
+  ],
+  "deposit_never_overcharges_depositor_for_shares": [
+    "rule_no_overcharge_deposit",
+    "rule_no_overcharge_deposit_exact"
+  ],
+  "vault_shares_equals_shares_mint_supply": [
+    "rule_shares_match_mint_supply_deposit",
+    "rule_shares_match_mint_supply_deposit_exact"
+  ],
+  "deposit_then_redeem_is_not_profitable": [
+    "rule_deposit_then_redeem_not_profitable",
+    "rule_deposit_exact_then_redeem_not_profitable"
+  ],
+  "deposit_prices_shares_against_stale_asset_balance": [
+    "rule_stale_balance_pricing_deposit",
+    "rule_stale_balance_pricing_deposit_exact"
+  ]
+}
