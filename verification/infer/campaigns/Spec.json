@@ -1,0 +1,60 @@
+{
+  "entry_file": "src/lib.rs",
+  "summary": "Single-asset share vault (crate certora_vault, programs/vault). The state that matters is Vault.shares (shares issued) and Vault.assets (assets held), both PodU64 read as u64. Each processor in processor/ loads accounts, calls one pure vault operation in operations/ on &mut Vault, then performs stubbed SPL CPIs (out of scope). The operations: vault_deposit_assets / vault_deposit_assets_with_fee (mint convert_assets_to_shares(net) shares, add net assets), vault_deposit_assets_exact (mint shares, add convert_shares_to_assets(shares) assets), vault_deposit_assets_with_fee_exact (computes an effect but does NOT mutate the vault), vault_redeem_shares (burn n shares, remove convert_shares_to_assets(n) assets, then check solvency), vault_update_reward (set assets to a larger observed balance), vault_process_slash (remove assets, then check solvency), vault_collect_fee (zero fee_amount). Conversions are identity when shares == assets, otherwise floor(x*num/den) via u128 mul_div_floor (Err MathOverflow on zero divisor or u64 overflow). mint_shares/add_token reject amount 0 (GuardFail) and overflow (MathOverflow); burn_shares/del_token reject underflow; del_token additionally fails with GuardFail if the result is insolvent. The central property is solvency: shares <= assets (Vault::is_solvent). The Rust functions mutate in place before later steps can fail, so on Err the &mut Vault can be partially updated (Solana reverts the account on instruction failure); properties are therefore stated for the Ok case, plus explicit no-mutation claims where the code fails before any write.",
+  "properties": [
+    "vault_deposit_assets(v, t): starting from a solvent vault (shares <= assets), if it returns Ok(e) then e.shares_to_user = convert_assets_to_shares(t) (= t when shares == assets, else floor(t*shares/assets)), e.assets_to_vault = t, the new shares = old shares + e.shares_to_user, the new assets = old assets + t, e.shares_to_user > 0, and the resulting vault is solvent.",
+    "vault_deposit_assets(v, t) returns Err(GuardFail) without modifying the vault when the computed share amount is 0 (e.g. t = 0, or t*shares < assets when shares != assets).",
+    "vault_deposit_assets_with_fee(v, t): if fee_bps <= 10000 and the call returns Ok(e), then with fee = floor(t*fee_bps/10000) and net = t - fee: e.assets_to_fee = fee, e.assets_to_vault = net, e.shares_to_user = convert_assets_to_shares(net) > 0, shares increase by e.shares_to_user, assets increase by net, fee_amount is unchanged, and if the vault was solvent before it is solvent after; if fee_bps > 10000 it returns Err(GuardFail) and the vault is unchanged.",
+    "vault_deposit_assets_exact(v, t): starting from a solvent vault, if it returns Ok(e) then e.shares_to_user = convert_assets_to_shares(t) > 0, e.assets_to_vault = convert_shares_to_assets(e.shares_to_user) with e.shares_to_user <= e.assets_to_vault <= t, shares increase by e.shares_to_user, assets increase by e.assets_to_vault, and the resulting vault is solvent.",
+    "vault_deposit_assets_with_fee_exact(v, t) never modifies the vault (shares, assets, fee_amount, fee_bps unchanged) whether it returns Ok or Err; on Ok, e.shares_to_user = convert_assets_to_shares(t - floor(t*fee_bps/10000)), e.assets_to_vault = convert_shares_to_assets(e.shares_to_user), and e.assets_to_fee = floor(e.assets_to_vault*fee_bps/10000); it fails with GuardFail when fee_bps > 10000.",
+    "vault_redeem_shares(v, n): if it returns Ok(e) then e.shares_to_burn = n, e.assets_to_user = convert_shares_to_assets(n) (= n when shares == assets, else floor(n*assets/shares)), new shares = old shares - n, new assets = old assets - e.assets_to_user, and the resulting vault is solvent (enforced by del_token's check, regardless of the starting state).",
+    "vault_redeem_shares(v, n) on a solvent vault with n <= shares always succeeds (no MathOverflow, the solvency check in del_token never fires), since assets - floor(n*assets/shares) >= shares - n; when n > shares it returns Err.",
+    "vault_redeem_shares(v, n) on a vault with shares == 0 and assets > 0 returns Err(MathOverflow) (division by zero) before mutating; with shares == assets == 0 and n > 0 burn_shares underflows and returns Err.",
+    "vault_update_reward(v, b): if b < assets it returns Err(MathOverflow) and leaves the vault unchanged; otherwise it returns Ok(VaultEffect::default()), sets assets = b (unchanged when b == assets), leaves shares unchanged, and preserves solvency.",
+    "vault_process_slash(v, a): it returns Ok(e) iff a <= assets and shares <= assets - a; on Ok, new assets = old assets - a, shares unchanged, e.assets_to_user = a, and the vault is solvent; if a > assets it returns Err(MathOverflow) with the vault unchanged.",
+    "vault_collect_fee(v) always returns Ok(e) with e.assets_to_user = old fee_amount, sets fee_amount to 0, and leaves shares and assets unchanged.",
+    "convert_assets_to_shares(x) on a solvent vault (shares <= assets) returns Ok(y) with y <= x (y = x when shares == assets, else floor(x*shares/assets)); convert_shares_to_assets(y) on a solvent vault with shares != assets returns floor(y*assets/shares) >= y."
+  ],
+  "invariants": [
+    "Solvency: Vault.shares <= Vault.assets (Vault::is_solvent). Every vault operation (vault_deposit_assets, vault_deposit_assets_with_fee, vault_deposit_assets_exact, vault_deposit_assets_with_fee_exact, vault_redeem_shares, vault_update_reward, vault_process_slash, vault_collect_fee) that returns Ok and starts from a solvent vault leaves the vault solvent. vault_redeem_shares and vault_process_slash establish solvency on Ok even from an insolvent state; the deposit operations do not check it and rely on the precondition.",
+    "The default/new vault (shares = assets = 0) is solvent."
+  ],
+  "edge_cases": [
+    "shares == assets (including 0 == 0): conversions are the identity, bypassing mul_div (so an empty vault deposits 1:1).",
+    "Deposit amount 0, or a deposit whose floor-converted share amount is 0: mint_shares fails with GuardFail.",
+    "u64 overflow in mint_shares/add_token (shares + x or assets + x > u64::MAX): Err(MathOverflow); in the deposit ops shares have already been incremented in place before add_token fails (partial mutation on Err, reverted by Solana).",
+    "mul_div_floor intermediate computed in u128 (no overflow of the product) but the quotient may exceed u64 -> Err(MathOverflow); divisor 0 -> Err(MathOverflow).",
+    "Redeem n > shares: burn_shares underflow -> Err (convert may already have returned a value or overflowed).",
+    "Redeem from shares == 0 with assets > 0: division by zero in convert_shares_to_assets -> Err(MathOverflow).",
+    "Slash amount that would make assets < shares: del_token writes the reduced assets and then returns Err(GuardFail) (partial mutation on Err); slash amount > assets: Err(MathOverflow) before any write.",
+    "update_reward with observed balance equal to assets: reward 0, add_token is skipped, Ok with no change; balance below assets: Err.",
+    "fee_bps > 10000: fee_in_bps fails with GuardFail in both fee deposit paths; fee_bps = 10000 makes net = 0 so the deposit fails on mint of 0 shares.",
+    "vault_deposit_assets_with_fee_exact mutates nothing even though its processor transfers assets and mints shares.",
+    "No operation ever increases fee_amount; deposit fees go to an external account, not to Vault.fee_amount."
+  ],
+  "target_patterns": [
+    "crate::operations::vault_operations::vault_deposit_assets",
+    "crate::operations::vault_operations::vault_redeem_shares",
+    "crate::operations::vault_operations::vault_update_reward",
+    "crate::operations::vault_operations::vault_process_slash",
+    "crate::operations::vault_fee_operations::vault_deposit_assets_with_fee",
+    "crate::operations::vault_fee_operations::vault_collect_fee",
+    "crate::operations::vault_exact_deposit_operations::vault_deposit_assets_exact",
+    "crate::operations::vault_exact_deposit_operations::vault_deposit_assets_with_fee_exact",
+    "crate::state::_::is_solvent"
+  ],
+  "relevant_state": [
+    "Vault.shares",
+    "Vault.assets",
+    "Vault.fee_bps",
+    "Vault.fee_amount",
+    "VaultEffect.shares_to_burn",
+    "VaultEffect.shares_to_user",
+    "VaultEffect.assets_to_vault",
+    "VaultEffect.assets_to_user",
+    "VaultEffect.assets_to_fee"
+  ],
+  "anchor_functions": [
+    "is_solvent"
+  ]
+}
