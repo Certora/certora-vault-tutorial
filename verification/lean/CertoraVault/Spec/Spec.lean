@@ -289,14 +289,67 @@ theorem vault_deposit_assets_exact_ok (v : state.Vault) (t : Std.U64) (hsolv : S
         r.2.fee_bps = v.fee_bps ∧
         r.2.fee_amount = v.fee_amount ∧
         Solvent r.2
-      | .Err _ => True ⦄ := by sorry
+      | .Err _ => True ⦄ := by
+  have hsolv' := hsolv
+  unfold Solvent at hsolv'
+  unfold operations.vault_exact_deposit_operations.vault_deposit_assets_exact
+  step as ⟨r, hr⟩
+  rcases r with y | e
+  · simp only at hr
+    have hy : y.val = assetsToShares v t.val := a2s_val hr
+    simp only [branch_Ok, Std.bind_ok]
+    step as ⟨r1, hr1⟩
+    rcases r1 with z | e
+    · simp only at hr1
+      have hz : z.val = sharesToAssets v y.val := s2a_val hr1
+      have hyz : y.val ≤ z.val := by
+        by_cases h : v.shares.val = v.assets.val
+        · rw [hr1.1 h]
+        · obtain ⟨hs, hz'⟩ := hr1.2 h
+          rw [hz']; exact le_mul_div_of_le _ _ _ (by scalar_tac) hsolv'
+      have hzt : z.val ≤ t.val := by
+        by_cases h : v.shares.val = v.assets.val
+        · rw [hr1.1 h, hr.1 h]
+        · obtain ⟨_, hz'⟩ := hr1.2 h
+          obtain ⟨_, hy'⟩ := hr.2 h
+          rw [hz', hy']; exact round_trip_le _ _ _
+      simp only [branch_Ok, Std.bind_ok]
+      step as ⟨r2, v1, hr2⟩
+      rcases r2 with _ | e
+      · simp only at hr2
+        simp only [branch_Ok, Std.bind_ok]
+        step as ⟨r3, v2, hr3⟩
+        rcases r3 with _ | e
+        · simp only at hr3
+          simp only [branch_Ok, Std.bind_ok, VaultEffect_default_eq, WP.spec_ok,
+            zeroEffect_shares_to_burn, zeroEffect_assets_to_user, zeroEffect_assets_to_fee,
+            true_and, Solvent]
+          obtain ⟨h1, _, h3, h4, h5, h6⟩ := hr2
+          obtain ⟨_, _, k3, k4, k5, k6⟩ := hr3
+          refine ⟨hy, hz, h1, hyz, hzt, ?_, ?_, ?_, ?_, ?_⟩
+          · rw [k4, h3]
+          · rw [k3, h4]
+          · rw [k5, h5]
+          · rw [k6, h6]
+          · rw [k4, k3, h3, h4]; scalar_tac
+        · simp
+      · simp
+    · simp
+  · simp
 
 /-- Solvency preservation (committed state) for `vault_deposit_assets_exact`. -/
 @[lusterna]
 theorem vault_deposit_assets_exact_preserves_solvent (v : state.Vault) (t : Std.U64)
     (hsolv : Solvent v) :
     operations.vault_exact_deposit_operations.vault_deposit_assets_exact v t ⦃ r =>
-      Solvent (committed v r) ⦄ := by sorry
+      Solvent (committed v r) ⦄ := by
+  apply WP.spec_mono (vault_deposit_assets_exact_ok v t hsolv)
+  rintro ⟨r, v'⟩ h
+  rcases r with e | e
+  · simp only [committed]
+    simp only at h
+    exact h.2.2.2.2.2.2.2.2.2.2.2.2
+  · simpa [committed] using hsolv
 
 /-! ## `vault_deposit_assets_with_fee_exact` -/
 
@@ -315,7 +368,41 @@ theorem vault_deposit_assets_with_fee_exact_spec (v : state.Vault) (t : Std.U64)
         e.assets_to_vault.val = sharesToAssets v e.shares_to_user.val ∧
         e.assets_to_fee.val = feeOf v.fee_bps.val e.assets_to_vault.val ∧
         e.shares_to_burn.val = 0 ∧ e.assets_to_user.val = 0
-      | .Err _ => True ⦄ := by sorry
+      | .Err _ => True ⦄ := by
+  unfold operations.vault_exact_deposit_operations.vault_deposit_assets_with_fee_exact
+  step as ⟨r, hr⟩
+  rcases r with f | e
+  · simp only at hr
+    obtain ⟨rfl, hbps⟩ := hr
+    simp only [branch_Ok, Std.bind_ok]
+    step as ⟨g, hg⟩
+    rcases g with g | e
+    · simp only at hg
+      have hnet : g.net_amount.val = t.val - feeOf v.fee_bps.val t.val := by
+        simp only [feeOf]; scalar_tac
+      simp only [branch_Ok, Std.bind_ok]
+      step as ⟨r2, hr2⟩
+      rcases r2 with y | e
+      · simp only at hr2
+        have hy : y.val = assetsToShares v g.net_amount.val := a2s_val hr2
+        simp only [branch_Ok, Std.bind_ok]
+        step as ⟨r3, hr3⟩
+        rcases r3 with z | e
+        · simp only at hr3
+          have hz : z.val = sharesToAssets v y.val := s2a_val hr3
+          simp only [branch_Ok, Std.bind_ok]
+          step as ⟨g2, hg2⟩
+          rcases g2 with g2 | e
+          · simp only at hg2
+            simp only [branch_Ok, Std.bind_ok, VaultEffect_default_eq, WP.spec_ok,
+              zeroEffect_shares_to_burn, zeroEffect_assets_to_user, true_and, and_true]
+            refine ⟨hbps, ?_, hz, hg2.1⟩
+            rw [hy, hnet]
+          · simp at hg2
+        · simp
+      · simp
+    · simp at hg
+  · simp
 
 /-- A fee basis-point setting above `10000` makes `vault_deposit_assets_with_fee_exact` fail with
 `GuardFail`. -/
@@ -323,14 +410,27 @@ theorem vault_deposit_assets_with_fee_exact_spec (v : state.Vault) (t : Std.U64)
 theorem vault_deposit_assets_with_fee_exact_bad_bps (v : state.Vault) (t : Std.U64)
     (hbps : 10000 < v.fee_bps.val) :
     operations.vault_exact_deposit_operations.vault_deposit_assets_with_fee_exact v t ⦃ r =>
-      r.1 = .Err errors.VaultError.GuardFail ∧ r.2 = v ⦄ := by sorry
+      r.1 = .Err errors.VaultError.GuardFail ∧ r.2 = v ⦄ := by
+  unfold operations.vault_exact_deposit_operations.vault_deposit_assets_with_fee_exact
+  step as ⟨r, hr⟩
+  rcases r with f | e
+  · simp only at hr
+    scalar_tac
+  · simp only at hr
+    simp [hr.2]
 
 /-- Solvency preservation (committed state) for `vault_deposit_assets_with_fee_exact`. -/
 @[lusterna]
 theorem vault_deposit_assets_with_fee_exact_preserves_solvent (v : state.Vault) (t : Std.U64)
     (hsolv : Solvent v) :
     operations.vault_exact_deposit_operations.vault_deposit_assets_with_fee_exact v t ⦃ r =>
-      Solvent (committed v r) ⦄ := by sorry
+      Solvent (committed v r) ⦄ := by
+  apply WP.spec_mono (vault_deposit_assets_with_fee_exact_spec v t)
+  rintro ⟨r, v'⟩ ⟨h, _⟩
+  simp only at h
+  rcases r with e | e
+  · simpa [committed, h] using hsolv
+  · simpa [committed] using hsolv
 
 /-! ## `vault_redeem_shares` -/
 
@@ -350,7 +450,34 @@ theorem vault_redeem_shares_ok (v : state.Vault) (n : Std.U64) :
         r.2.fee_bps = v.fee_bps ∧
         r.2.fee_amount = v.fee_amount ∧
         Solvent r.2
-      | .Err _ => True ⦄ := by sorry
+      | .Err _ => True ⦄ := by
+  unfold operations.vault_operations.vault_redeem_shares
+  step as ⟨r, hr⟩
+  rcases r with z | e
+  · simp only at hr
+    have hz : z.val = sharesToAssets v n.val := s2a_val hr
+    simp only [branch_Ok, Std.bind_ok]
+    step as ⟨r1, v1, hr1⟩
+    rcases r1 with _ | e
+    · simp only at hr1
+      simp only [branch_Ok, Std.bind_ok]
+      step as ⟨r2, v2, hr2⟩
+      rcases r2 with _ | e
+      · simp only at hr2
+        simp only [branch_Ok, Std.bind_ok, VaultEffect_default_eq, WP.spec_ok,
+          zeroEffect_shares_to_user, zeroEffect_assets_to_vault, zeroEffect_assets_to_fee,
+          true_and, Solvent]
+        obtain ⟨_, h1, h3, h4, h5⟩ := hr1
+        obtain ⟨_, k2, k3, k4, k5, k6⟩ := hr2
+        refine ⟨hz, ?_, ?_, ?_, ?_, ?_⟩
+        · rw [k4, h1]
+        · rw [← h3, ← k3]
+        · rw [k5, h4]
+        · rw [k6, h5]
+        · rw [k4]; scalar_tac
+      · simp
+    · simp
+  · simp
 
 /-- Liveness of redeem: on a solvent vault whose conversion is defined (`shares = assets`, or
 `shares > 0`), redeeming `n ≤ shares` always succeeds — no overflow, and the solvency check never
@@ -365,7 +492,49 @@ theorem vault_redeem_shares_succeeds (v : state.Vault) (n : Std.U64) (hsolv : So
         e.assets_to_user.val = sharesToAssets v n.val ∧
         r.2.shares.val + n.val = v.shares.val ∧
         r.2.assets.val + e.assets_to_user.val = v.assets.val
-      | .Err _ => False ⦄ := by sorry
+      | .Err _ => False ⦄ := by
+  unfold Solvent at hsolv
+  have hle : sharesToAssets v n.val ≤ v.assets.val := by
+    simp only [sharesToAssets]
+    split
+    · scalar_tac
+    · exact redeem_le_assets _ _ _ hn
+  have hsol : sharesToAssets v n.val + v.shares.val ≤ v.assets.val + n.val := by
+    simp only [sharesToAssets]
+    split
+    · scalar_tac
+    · exact redeem_solvent _ _ _ hn hsolv
+  unfold operations.vault_operations.vault_redeem_shares
+  step as ⟨r, hr⟩
+  rcases r with z | e
+  · simp only at hr
+    have hz : z.val = sharesToAssets v n.val := s2a_val hr
+    simp only [branch_Ok, Std.bind_ok]
+    step as ⟨r1, v1, hr1⟩
+    rcases r1 with _ | e
+    · simp only at hr1
+      simp only [branch_Ok, Std.bind_ok]
+      step as ⟨r2, v2, hr2⟩
+      rcases r2 with _ | e
+      · simp only at hr2
+        simp only [branch_Ok, Std.bind_ok, VaultEffect_default_eq, WP.spec_ok, true_and]
+        obtain ⟨_, h1, h3, _, _⟩ := hr1
+        obtain ⟨_, _, k3, k4, _, _⟩ := hr2
+        refine ⟨hz, ?_, ?_⟩
+        · rw [k4, h1]
+        · rw [← h3, ← k3]
+      · simp only at hr2
+        obtain ⟨_, h1, h3, _, _⟩ := hr1
+        rcases hr2 with k | k
+        · rw [h3] at k; scalar_tac
+        · rw [h3] at k; scalar_tac
+    · simp only at hr1
+      scalar_tac
+  · simp only at hr
+    obtain ⟨_, hne, h | h⟩ := hr
+    · scalar_tac
+    · simp only [sharesToAssets, hne, if_false] at hle
+      scalar_tac
 
 /-- Redeeming more shares than exist fails with `MathOverflow` (from the conversion or the
 `burn_shares` underflow) before any write. -/
@@ -373,7 +542,19 @@ theorem vault_redeem_shares_succeeds (v : state.Vault) (n : Std.U64) (hsolv : So
 theorem vault_redeem_shares_too_many (v : state.Vault) (n : Std.U64)
     (hn : v.shares.val < n.val) :
     operations.vault_operations.vault_redeem_shares v n ⦃ r =>
-      r.1 = .Err errors.VaultError.MathOverflow ∧ r.2 = v ⦄ := by sorry
+      r.1 = .Err errors.VaultError.MathOverflow ∧ r.2 = v ⦄ := by
+  unfold operations.vault_operations.vault_redeem_shares
+  step as ⟨r, hr⟩
+  rcases r with z | e
+  · simp only [branch_Ok, Std.bind_ok]
+    step as ⟨r1, v1, hr1⟩
+    rcases r1 with _ | e
+    · simp only at hr1
+      scalar_tac
+    · simp only at hr1
+      simp [hr1.1, hr1.2.2]
+  · simp only at hr
+    simp [hr.1]
 
 /-- Redeeming from a vault with no shares but positive assets divides by zero in
 `convert_shares_to_assets` and fails with `MathOverflow` before any write. -/
@@ -381,14 +562,28 @@ theorem vault_redeem_shares_too_many (v : state.Vault) (n : Std.U64)
 theorem vault_redeem_shares_zero_shares (v : state.Vault) (n : Std.U64)
     (hs : v.shares.val = 0) (ha : 0 < v.assets.val) :
     operations.vault_operations.vault_redeem_shares v n ⦃ r =>
-      r.1 = .Err errors.VaultError.MathOverflow ∧ r.2 = v ⦄ := by sorry
+      r.1 = .Err errors.VaultError.MathOverflow ∧ r.2 = v ⦄ := by
+  unfold operations.vault_operations.vault_redeem_shares
+  step as ⟨r, hr⟩
+  rcases r with z | e
+  · simp only at hr
+    have := (hr.2 (by scalar_tac)).1
+    scalar_tac
+  · simp only at hr
+    simp [hr.1]
 
 /-- Solvency preservation (committed state) for `vault_redeem_shares`. -/
 @[lusterna]
 theorem vault_redeem_shares_preserves_solvent (v : state.Vault) (n : Std.U64)
     (hsolv : Solvent v) :
     operations.vault_operations.vault_redeem_shares v n ⦃ r => Solvent (committed v r) ⦄ := by
-  sorry
+  apply WP.spec_mono (vault_redeem_shares_ok v n)
+  rintro ⟨r, v'⟩ h
+  rcases r with e | e
+  · simp only [committed]
+    simp only at h
+    exact h.2.2.2.2.2.2.2.2.2
+  · simpa [committed] using hsolv
 
 /-! ## `vault_update_reward` -/
 
