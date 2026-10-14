@@ -1,0 +1,22 @@
+{
+  "compiles": true,
+  "emitted_axioms": [],
+  "relevant_state": [
+    "Vault.shares",
+    "Vault.assets",
+    "Vault.fee_bps",
+    "Vault.fee_amount",
+    "VaultEffect.shares_to_burn",
+    "VaultEffect.shares_to_user",
+    "VaultEffect.assets_to_vault",
+    "VaultEffect.assets_to_user",
+    "VaultEffect.assets_to_fee"
+  ],
+  "generated_lean_files": [
+    "lean/CertoraVault.lean"
+  ],
+  "source_files_changed": [
+    "rust-toolchain.toml"
+  ],
+  "source_git_diff": " rust-toolchain.toml | 4 ----\n 1 file changed, 4 deletions(-)\n\ndiff --git a/rust-toolchain.toml b/rust-toolchain.toml\ndeleted file mode 100644\nindex 80b7b45..0000000\n--- a/rust-toolchain.toml\n+++ /dev/null\n@@ -1,4 +0,0 @@\n-[toolchain]\n-channel = \"1.79\"\n-components = [ \"rustfmt\", \"clippy\" ]\n-\n"
+}

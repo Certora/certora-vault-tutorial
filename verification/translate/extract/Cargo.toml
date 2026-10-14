@@ -1,0 +1,23 @@
+[package]
+name = "certora_vault"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# Standalone extraction crate (not a member of the original workspace).
+[workspace]
+
+[lib]
+name = "certora_vault"
+path = "src/lib.rs"
+
+[dependencies]
+
+[dev-dependencies]
+# Differential equivalence tests against the ORIGINAL program.
+original = { package = "certora_vault_tutorial", path = "../../../programs/vault" }
+
+# Copied verbatim from the deployed workspace manifest (/workspace/repo/Cargo.toml).
+[profile.release]
+overflow-checks = true
+lto = 'thin'
