@@ -1,6 +1,7 @@
 import Aeneas
 import CertoraVault
 import CertoraVault.LusternaSchemas
+import CertoraVault.VaultLemmas
 
 /-! # Spec campaign: single-asset share vault (`certora_vault`)
 
@@ -18,6 +19,7 @@ the pre-vault on `.Err`. -/
 
 open Aeneas Aeneas.Std Result
 open certora_vault
+open CertoraVault.VaultLemmas
 
 set_option linter.dupNamespace false
 
@@ -54,12 +56,18 @@ def committed {T E : Type} (v : state.Vault) (r : core.result.Result T E × stat
 getter). -/
 @[lusterna]
 theorem is_solvent_spec (v : state.Vault) :
-    state.Vault.is_solvent v ⦃ b => (b = true ↔ Solvent v) ⦄ := by sorry
+    state.Vault.is_solvent v ⦃ b => (b = true ↔ Solvent v) ⦄ := by
+  unfold state.Vault.is_solvent
+  simp only [num_shares_eq, num_assets_eq, Std.bind_ok, WP.spec_ok, decide_eq_true_eq, Solvent]
+  constructor
+  · intro h; scalar_tac
+  · intro h; scalar_tac
 
 /-- Base case of the solvency invariant: the default / new vault (all fields zero) is solvent. -/
 @[lusterna_lemma "base case of the solvency invariant: the Rust crate has no translated vault constructor, so this is a pure fact about the zero-initialised state"]
 theorem default_vault_solvent :
-    Solvent { shares := 0#u64, assets := 0#u64, fee_bps := 0#u64, fee_amount := 0#u64 } := by sorry
+    Solvent { shares := 0#u64, assets := 0#u64, fee_bps := 0#u64, fee_amount := 0#u64 } := by
+  simp [Solvent]
 
 /-! ## `vault_deposit_assets` -/
 
@@ -264,7 +272,14 @@ unchanged. -/
 @[lusterna]
 theorem vault_update_reward_below (v : state.Vault) (b : Std.U64) (hb : b.val < v.assets.val) :
     operations.vault_operations.vault_update_reward v b ⦃ r =>
-      r.1 = .Err errors.VaultError.MathOverflow ∧ r.2 = v ⦄ := by sorry
+      r.1 = .Err errors.VaultError.MathOverflow ∧ r.2 = v ⦄ := by
+  unfold operations.vault_operations.vault_update_reward
+  simp only [num_assets_eq, Std.bind_ok]
+  step as ⟨o, ho⟩
+  rcases o with _ | z
+  · simp
+  · simp only at ho
+    scalar_tac
 
 /-- An observed balance at least the recorded assets always succeeds with the default effect,
 sets `assets := b`, and leaves shares and fee fields unchanged. -/
@@ -278,14 +293,56 @@ theorem vault_update_reward_ok (v : state.Vault) (b : Std.U64) (hb : v.assets.va
         r.2.shares = v.shares ∧
         r.2.fee_bps = v.fee_bps ∧
         r.2.fee_amount = v.fee_amount
-      | .Err _ => False ⦄ := by sorry
+      | .Err _ => False ⦄ := by
+  unfold operations.vault_operations.vault_update_reward
+  simp only [num_assets_eq, Std.bind_ok]
+  step as ⟨o, ho⟩
+  rcases o with _ | z
+  · simp only at ho
+    scalar_tac
+  · simp only at ho
+    simp only [core.option.Option.ok_or, branch_Ok, Std.bind_ok]
+    split
+    · step as ⟨r1, v1, hr1⟩
+      rcases r1 with _ | e
+      · simp only at hr1
+        simp only [branch_Ok, Std.bind_ok, VaultEffect_default_eq, WP.spec_ok,
+          zeroEffect_shares_to_burn, zeroEffect_shares_to_user, zeroEffect_assets_to_vault,
+          zeroEffect_assets_to_user, zeroEffect_assets_to_fee, true_and]
+        obtain ⟨_, _, h1, h2, h3, h4⟩ := hr1
+        exact ⟨by scalar_tac, h2, h3, h4⟩
+      · simp only at hr1
+        obtain ⟨_, h | h⟩ := hr1
+        · scalar_tac
+        · scalar_tac
+    · simp [zeroEffect]
+      scalar_tac
 
 /-- `vault_update_reward` preserves solvency in every outcome (it never decreases assets and never
 touches shares; on `.Err` the vault is untouched). -/
 @[lusterna]
 theorem vault_update_reward_preserves_solvent (v : state.Vault) (b : Std.U64)
     (hsolv : Solvent v) :
-    operations.vault_operations.vault_update_reward v b ⦃ r => Solvent r.2 ⦄ := by sorry
+    operations.vault_operations.vault_update_reward v b ⦃ r => Solvent r.2 ⦄ := by
+  unfold operations.vault_operations.vault_update_reward
+  simp only [num_assets_eq, Std.bind_ok]
+  step as ⟨o, ho⟩
+  rcases o with _ | z
+  · simpa using hsolv
+  · simp only at ho
+    simp only [core.option.Option.ok_or, branch_Ok, Std.bind_ok]
+    split
+    · step as ⟨r1, v1, hr1⟩
+      rcases r1 with _ | e
+      · simp only at hr1
+        simp only [branch_Ok, Std.bind_ok, VaultEffect_default_eq, WP.spec_ok, Solvent]
+        obtain ⟨_, _, h1, h2, _⟩ := hr1
+        unfold Solvent at hsolv
+        rw [h2]; scalar_tac
+      · simp only at hr1
+        simp only [branch_Err, Std.bind_ok, from_residual_FromSame_Err, WP.spec_ok]
+        rw [hr1.1]; exact hsolv
+    · simpa using hsolv
 
 /-! ## `vault_process_slash` -/
 
@@ -305,14 +362,39 @@ theorem vault_process_slash_spec (v : state.Vault) (a : Std.U64) :
         e.assets_to_user = a ∧
         e.shares_to_burn.val = 0 ∧ e.shares_to_user.val = 0 ∧ e.assets_to_vault.val = 0 ∧ e.assets_to_fee.val = 0 ∧
         Solvent r.2
-      | .Err _ => ¬ (v.shares.val + a.val ≤ v.assets.val) ⦄ := by sorry
+      | .Err _ => ¬ (v.shares.val + a.val ≤ v.assets.val) ⦄ := by
+  unfold operations.vault_operations.vault_process_slash
+  step as ⟨r, v1, hr⟩
+  rcases r with _ | e
+  · simp only at hr
+    simp only [branch_Ok, Std.bind_ok, VaultEffect_default_eq, WP.spec_ok,
+      zeroEffect_shares_to_burn, zeroEffect_shares_to_user, zeroEffect_assets_to_vault,
+      zeroEffect_assets_to_fee, true_and, Solvent]
+    obtain ⟨_, h0, h1, h2, h3, h4⟩ := hr
+    refine ⟨h0, h1, h2, h3, h4, ?_⟩
+    rw [h2]; scalar_tac
+  · simp only at hr
+    simp only [branch_Err, Std.bind_ok, from_residual_FromSame_Err, WP.spec_ok]
+    rcases hr with h | h
+    · scalar_tac
+    · scalar_tac
 
 /-- A slash larger than the recorded assets fails with `MathOverflow` before any write. -/
 @[lusterna]
 theorem vault_process_slash_exceeds_assets (v : state.Vault) (a : Std.U64)
     (ha : v.assets.val < a.val) :
     operations.vault_operations.vault_process_slash v a ⦃ r =>
-      r.1 = .Err errors.VaultError.MathOverflow ∧ r.2 = v ⦄ := by sorry
+      r.1 = .Err errors.VaultError.MathOverflow ∧ r.2 = v ⦄ := by
+  unfold operations.vault_operations.vault_process_slash
+  step as ⟨r, v1, hr⟩
+  rcases r with _ | e
+  · simp only at hr
+    scalar_tac
+  · simp only at hr
+    simp only [branch_Err, Std.bind_ok, from_residual_FromSame_Err, WP.spec_ok]
+    rcases hr with h | h
+    · simp [h.1, h.2.2]
+    · scalar_tac
 
 /-- A slash within the assets that would leave the vault insolvent fails with `GuardFail`; the
 function has already written the reduced assets in memory (reverted by the runtime). -/
@@ -322,14 +404,33 @@ theorem vault_process_slash_insolvent (v : state.Vault) (a : Std.U64)
     operations.vault_operations.vault_process_slash v a ⦃ r =>
       r.1 = .Err errors.VaultError.GuardFail ∧
       r.2.assets.val + a.val = v.assets.val ∧
-      r.2.shares = v.shares ⦄ := by sorry
+      r.2.shares = v.shares ⦄ := by
+  unfold operations.vault_operations.vault_process_slash
+  step as ⟨r, v1, hr⟩
+  rcases r with _ | e
+  · simp only at hr
+    scalar_tac
+  · simp only at hr
+    simp only [branch_Err, Std.bind_ok, from_residual_FromSame_Err, WP.spec_ok]
+    rcases hr with h | h
+    · scalar_tac
+    · obtain ⟨_, _, h1, h2, h3, _⟩ := h
+      simp [h1, h2, h3]
 
 /-- Solvency preservation (committed state) for `vault_process_slash`. -/
 @[lusterna]
 theorem vault_process_slash_preserves_solvent (v : state.Vault) (a : Std.U64)
     (hsolv : Solvent v) :
     operations.vault_operations.vault_process_slash v a ⦃ r => Solvent (committed v r) ⦄ := by
-  sorry
+  unfold operations.vault_operations.vault_process_slash
+  step as ⟨r, v1, hr⟩
+  rcases r with _ | e
+  · simp only at hr
+    simp only [branch_Ok, Std.bind_ok, VaultEffect_default_eq, WP.spec_ok, committed, Solvent]
+    obtain ⟨_, h0, h1, h2, _⟩ := hr
+    rw [h2]; scalar_tac
+  · simp only [branch_Err, Std.bind_ok, from_residual_FromSame_Err, WP.spec_ok, committed]
+    exact hsolv
 
 /-! ## `vault_collect_fee` -/
 
@@ -344,12 +445,16 @@ theorem vault_collect_fee_spec (v : state.Vault) :
       r.2.fee_bps = v.fee_bps ∧
       match r.1 with
       | .Ok e => e.assets_to_user = v.fee_amount ∧ e.shares_to_burn.val = 0 ∧ e.shares_to_user.val = 0 ∧ e.assets_to_vault.val = 0 ∧ e.assets_to_fee.val = 0
-      | .Err _ => False ⦄ := by sorry
+      | .Err _ => False ⦄ := by
+  unfold operations.vault_fee_operations.vault_collect_fee
+  simp [zeroEffect]
 
 /-- `vault_collect_fee` preserves solvency. -/
 @[lusterna]
 theorem vault_collect_fee_preserves_solvent (v : state.Vault) (hsolv : Solvent v) :
-    operations.vault_fee_operations.vault_collect_fee v ⦃ r => Solvent r.2 ⦄ := by sorry
+    operations.vault_fee_operations.vault_collect_fee v ⦃ r => Solvent r.2 ⦄ := by
+  unfold operations.vault_fee_operations.vault_collect_fee
+  simpa [Solvent] using hsolv
 
 /-! ## Conversions (helpers, not declared targets) -/
 

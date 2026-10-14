@@ -36,6 +36,16 @@ theorem from_residual_FromSame_Err (T E : Type) (e : E) :
   simp [core.result.Result.Insts.CoreOpsTry_traitFromResidualResult.from_residual,
     core.convert.FromSame.from]
 
+@[simp]
+theorem branch_Ok {T E : Type} (x : T) :
+    core.result.Result.Insts.CoreOpsTry.branch (.Ok x : core.result.Result T E) =
+      ok (.Continue x) := rfl
+
+@[simp]
+theorem branch_Err {T E : Type} (e : E) :
+    core.result.Result.Insts.CoreOpsTry.branch (.Err e : core.result.Result T E) =
+      ok (.Break (.Err e)) := rfl
+
 @[simp] theorem num_shares_eq (v : state.Vault) : state.Vault.num_shares v = ok v.shares := rfl
 @[simp] theorem num_assets_eq (v : state.Vault) : state.Vault.num_assets v = ok v.assets := rfl
 @[simp] theorem fee_amount_eq (v : state.Vault) :
