@@ -1,0 +1,155 @@
+{
+  "axioms": {
+    "clean": [
+      "Spec::is_solvent_spec",
+      "Spec::default_vault_solvent",
+      "Spec::vault_deposit_assets_ok",
+      "Spec::vault_deposit_assets_zero_shares",
+      "Spec::vault_deposit_assets_preserves_solvent",
+      "Spec::vault_deposit_assets_with_fee_ok",
+      "Spec::vault_deposit_assets_with_fee_bad_bps",
+      "Spec::vault_deposit_assets_with_fee_preserves_solvent",
+      "Spec::vault_deposit_assets_exact_ok",
+      "Spec::vault_deposit_assets_exact_preserves_solvent",
+      "Spec::vault_deposit_assets_with_fee_exact_spec",
+      "Spec::vault_deposit_assets_with_fee_exact_bad_bps",
+      "Spec::vault_deposit_assets_with_fee_exact_preserves_solvent",
+      "Spec::vault_redeem_shares_ok",
+      "Spec::vault_redeem_shares_succeeds",
+      "Spec::vault_redeem_shares_too_many",
+      "Spec::vault_redeem_shares_zero_shares",
+      "Spec::vault_redeem_shares_preserves_solvent",
+      "Spec::vault_update_reward_below",
+      "Spec::vault_update_reward_ok",
+      "Spec::vault_update_reward_preserves_solvent",
+      "Spec::vault_process_slash_spec",
+      "Spec::vault_process_slash_exceeds_assets",
+      "Spec::vault_process_slash_insolvent",
+      "Spec::vault_process_slash_preserves_solvent",
+      "Spec::vault_collect_fee_spec",
+      "Spec::vault_collect_fee_preserves_solvent",
+      "Spec::convert_assets_to_shares_spec",
+      "Spec::convert_shares_to_assets_spec"
+    ],
+    "assumed": {},
+    "tainted": [],
+    "impl_verified": [
+      "Spec::is_solvent_spec",
+      "Spec::vault_deposit_assets_ok",
+      "Spec::vault_deposit_assets_zero_shares",
+      "Spec::vault_deposit_assets_preserves_solvent",
+      "Spec::vault_deposit_assets_with_fee_ok",
+      "Spec::vault_deposit_assets_with_fee_bad_bps",
+      "Spec::vault_deposit_assets_with_fee_preserves_solvent",
+      "Spec::vault_deposit_assets_exact_ok",
+      "Spec::vault_deposit_assets_exact_preserves_solvent",
+      "Spec::vault_deposit_assets_with_fee_exact_spec",
+      "Spec::vault_deposit_assets_with_fee_exact_bad_bps",
+      "Spec::vault_deposit_assets_with_fee_exact_preserves_solvent",
+      "Spec::vault_redeem_shares_ok",
+      "Spec::vault_redeem_shares_succeeds",
+      "Spec::vault_redeem_shares_too_many",
+      "Spec::vault_redeem_shares_zero_shares",
+      "Spec::vault_redeem_shares_preserves_solvent",
+      "Spec::vault_update_reward_below",
+      "Spec::vault_update_reward_ok",
+      "Spec::vault_update_reward_preserves_solvent",
+      "Spec::vault_process_slash_spec",
+      "Spec::vault_process_slash_exceeds_assets",
+      "Spec::vault_process_slash_insolvent",
+      "Spec::vault_process_slash_preserves_solvent",
+      "Spec::vault_collect_fee_spec",
+      "Spec::vault_collect_fee_preserves_solvent",
+      "Spec::convert_assets_to_shares_spec",
+      "Spec::convert_shares_to_assets_spec"
+    ],
+    "impl_verified_assumed": [],
+    "surface_only": [
+      "Spec::default_vault_solvent"
+    ],
+    "abstract_only": [],
+    "declared_assumptions": [],
+    "illegitimate_assumptions": [],
+    "refutations": [],
+    "sorry_remaining": 0,
+    "grounding": {
+      "anchors": [
+        "is_solvent"
+      ],
+      "grounded": [
+        "is_solvent"
+      ],
+      "ungrounded": []
+    },
+    "statement_drift": {
+      "stable": [
+        "CertoraVault.Spec.Spec.vault_deposit_assets_with_fee_exact_spec",
+        "CertoraVault.Spec.Spec.vault_process_slash_preserves_solvent",
+        "CertoraVault.Spec.Spec.vault_update_reward_below",
+        "CertoraVault.Spec.Spec.vault_deposit_assets_with_fee_ok",
+        "CertoraVault.Spec.Spec.vault_deposit_assets_with_fee_exact_preserves_solvent",
+        "CertoraVault.Spec.Spec.vault_redeem_shares_ok",
+        "CertoraVault.Spec.Spec.vault_deposit_assets_preserves_solvent",
+        "CertoraVault.Spec.Spec.vault_deposit_assets_with_fee_preserves_solvent",
+        "CertoraVault.Spec.Spec.vault_deposit_assets_with_fee_bad_bps",
+        "CertoraVault.Spec.Spec.vault_redeem_shares_succeeds",
+        "CertoraVault.Spec.Spec.vault_redeem_shares_preserves_solvent",
+        "CertoraVault.Spec.Spec.vault_collect_fee_spec",
+        "CertoraVault.Spec.Spec.vault_deposit_assets_ok",
+        "CertoraVault.Spec.Spec.convert_shares_to_assets_spec",
+        "CertoraVault.Spec.Spec.vault_deposit_assets_exact_preserves_solvent",
+        "CertoraVault.Spec.Spec.vault_deposit_assets_zero_shares",
+        "CertoraVault.Spec.Spec.convert_assets_to_shares_spec",
+        "CertoraVault.Spec.Spec.vault_redeem_shares_zero_shares",
+        "CertoraVault.Spec.Spec.vault_process_slash_insolvent",
+        "CertoraVault.Spec.Spec.vault_redeem_shares_too_many",
+        "CertoraVault.Spec.Spec.vault_deposit_assets_with_fee_exact_bad_bps",
+        "CertoraVault.Spec.Spec.is_solvent_spec",
+        "CertoraVault.Spec.Spec.vault_update_reward_ok",
+        "CertoraVault.Spec.Spec.vault_update_reward_preserves_solvent",
+        "CertoraVault.Spec.Spec.vault_process_slash_spec",
+        "CertoraVault.Spec.Spec.vault_deposit_assets_exact_ok",
+        "CertoraVault.Spec.Spec.vault_process_slash_exceeds_assets",
+        "CertoraVault.Spec.Spec.default_vault_solvent",
+        "CertoraVault.Spec.Spec.vault_collect_fee_preserves_solvent"
+      ],
+      "accounted": [],
+      "unaccounted": []
+    }
+  },
+  "spec_judge": {
+    "defects": []
+  },
+  "overflow_posture": {
+    "deploy_profile": {
+      "overflow-checks": true,
+      "debug-assertions": false,
+      "package": {}
+    },
+    "deploy_source": "/workspace/repo/Cargo.toml",
+    "compiled_profile": {
+      "overflow-checks": true,
+      "debug-assertions": false,
+      "package": {}
+    },
+    "compiled_source": "/workspace/repo/verification/translate/extract/Cargo.toml",
+    "model_checked_ops": false,
+    "block": false
+  },
+  "target_patterns": [
+    "crate::operations::vault_operations::vault_deposit_assets",
+    "crate::operations::vault_operations::vault_redeem_shares",
+    "crate::operations::vault_operations::vault_update_reward",
+    "crate::operations::vault_operations::vault_process_slash",
+    "crate::operations::vault_fee_operations::vault_deposit_assets_with_fee",
+    "crate::operations::vault_fee_operations::vault_collect_fee",
+    "crate::operations::vault_exact_deposit_operations::vault_deposit_assets_exact",
+    "crate::operations::vault_exact_deposit_operations::vault_deposit_assets_with_fee_exact",
+    "crate::state::_::is_solvent"
+  ],
+  "opaque_assumptions": [],
+  "holes": [],
+  "lean_path": "lean/CertoraVault.lean",
+  "lean_build_success": true,
+  "sorry_remaining": 0
+}
