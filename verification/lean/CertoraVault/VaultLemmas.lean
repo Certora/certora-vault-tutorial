@@ -364,4 +364,71 @@ theorem FeeBps.apply.spec (bps : utils.math.FeeBps) (amt : U64)
     have : amt.val ≤ U64.max := by scalar_tac
     agrind
 
+
+/-! ## Pure arithmetic facts about the conversions -/
+
+/-- Converting assets to shares on a solvent vault never inflates: `x * s / a ≤ x`. -/
+theorem mul_div_le_self_of_le (x s a : Nat) (h : s ≤ a) : x * s / a ≤ x := by
+  rcases Nat.eq_zero_or_pos a with ha | ha
+  · simp [ha]
+  · apply Nat.div_le_of_le_mul
+    have := Nat.mul_le_mul_left x h
+    agrind
+
+/-- Converting shares to assets on a solvent vault never deflates: `y ≤ y * a / s`. -/
+theorem le_mul_div_of_le (y s a : Nat) (hs : 0 < s) (h : s ≤ a) : y ≤ y * a / s := by
+  rw [Nat.le_div_iff_mul_le hs]
+  exact Nat.mul_le_mul_left y h
+
+/-- Round trip: `floor(floor(t * s / a) * a / s) ≤ t`. -/
+theorem round_trip_le (t s a : Nat) : t * s / a * a / s ≤ t := by
+  rcases Nat.eq_zero_or_pos s with hs | hs
+  · simp [hs]
+  · apply Nat.div_le_of_le_mul
+    have := Nat.div_mul_le_self (t * s) a
+    agrind
+
+/-- Redeem never pays out more than the vault holds: `n ≤ s → n * a / s ≤ a`. -/
+theorem redeem_le_assets (n s a : Nat) (hn : n ≤ s) : n * a / s ≤ a := by
+  rcases Nat.eq_zero_or_pos s with hs | hs
+  · simp [hs]
+  · apply Nat.div_le_of_le_mul
+    have := Nat.mul_le_mul_right a hn
+    agrind
+
+/-- Redeem keeps the vault solvent: with `n ≤ s ≤ a`, `n * a / s + s ≤ a + n`. -/
+theorem redeem_solvent (n s a : Nat) (hn : n ≤ s) (hsa : s ≤ a) :
+    n * a / s + s ≤ a + n := by
+  obtain ⟨k, rfl⟩ : ∃ k, a = s + k := ⟨a - s, by agrind⟩
+  have hk : n * k ≤ s * k := Nat.mul_le_mul_right k hn
+  have h1 : n * (s + k) ≤ s * (k + n) := by
+    have e1 : n * (s + k) = s * n + n * k := by ring
+    have e2 : s * (k + n) = s * k + s * n := by ring
+    rw [e1, e2]; agrind
+  have := Nat.div_le_of_le_mul h1
+  agrind
+
+
+/-- Closed form of a successful `convert_assets_to_shares` result. -/
+theorem a2s_val {v : state.Vault} {x y : U64}
+    (hr : (v.shares.val = v.assets.val → y = x) ∧
+      (v.shares.val ≠ v.assets.val →
+        v.assets.val ≠ 0 ∧ y.val = x.val * v.shares.val / v.assets.val)) :
+    y.val = if v.shares.val = v.assets.val then x.val
+      else x.val * v.shares.val / v.assets.val := by
+  by_cases h : v.shares.val = v.assets.val
+  · simp [h, hr.1 h]
+  · simp only [h, if_false]; exact (hr.2 h).2
+
+/-- Closed form of a successful `convert_shares_to_assets` result. -/
+theorem s2a_val {v : state.Vault} {x y : U64}
+    (hr : (v.shares.val = v.assets.val → y = x) ∧
+      (v.shares.val ≠ v.assets.val →
+        v.shares.val ≠ 0 ∧ y.val = x.val * v.assets.val / v.shares.val)) :
+    y.val = if v.shares.val = v.assets.val then x.val
+      else x.val * v.assets.val / v.shares.val := by
+  by_cases h : v.shares.val = v.assets.val
+  · simp [h, hr.1 h]
+  · simp only [h, if_false]; exact (hr.2 h).2
+
 end CertoraVault.VaultLemmas
