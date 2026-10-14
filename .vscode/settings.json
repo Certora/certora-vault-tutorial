@@ -1,7 +1,4 @@
 {
-    "rust-analyzer.cargo.features": [
-        "certora"
-    ],
     "cSpell.words": [
         "Brutto",
         "netto"

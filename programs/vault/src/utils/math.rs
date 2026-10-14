@@ -26,42 +26,6 @@ pub mod math_native {
     }
 }
 
-#[cfg(feature = "certora")]
-pub mod math_certora {
-    use super::*;
-    use cvlr::mathint::NativeInt;
-
-    pub fn mul_div_floor(a: u64, b: u64, c: u64) -> VaultResult<u64> {
-        let a = NativeInt::from(a);
-        let b = NativeInt::from(b);
-        let c = NativeInt::from(c);
-
-        let res = a.muldiv(b, c);
-
-        if res.is_u64() {
-            Ok(u64::from(res))
-        } else {
-            Err(VaultError::MathOverflow)
-        }
-    }
-
-    pub fn mul_div_ceil(a: u64, b: u64, c: u64) -> VaultResult<u64> {
-        let a = NativeInt::from(a);
-        let b = NativeInt::from(b);
-        let c = NativeInt::from(c);
-        let res = a.muldiv_ceil(b, c);
-
-        if res.is_u64() {
-            Ok(u64::from(res))
-        } else {
-            Err(VaultError::MathOverflow)
-        }
-    }
-}
-
-#[cfg(feature = "certora")]
-pub use math_certora::*;
-#[cfg(not(feature = "certora"))]
 pub use math_native::*;
 
 pub struct GrossAmount {
