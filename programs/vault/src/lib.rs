@@ -11,3 +11,5 @@ pub use errors::{VaultError, VaultResult};
 use solana_program::declare_id;
 
 declare_id!("CRTRcNtiG8u4EFNkVnQkKcFYRRkLa2LtFPbihbsrcbJY");
+
+pub const PREFLIGHT_FAILURE: u64 = "this branch deliberately does not compile";
